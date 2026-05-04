@@ -14,13 +14,24 @@ export default function Header() {
         }
     }, []);
 
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setUser(null);
-        setOpenUserMenu(false);
-        window.location.href = '/login';
+    const handleLogout = async () => {
+        const token = localStorage.getItem('token');
+        try {
+            await fetch(`${process.env.REACT_APP_API_URL}/auth/logout`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+        } finally {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            setUser(null);
+            setOpenUserMenu(false);
+            window.location.href = '/login';
+        }
     };
+
 
     return (
         <header className="fixed top-0 left-0 right-0 z-50 border-b border-gray-700 bg-white/90 backdrop-blur-md h-20">

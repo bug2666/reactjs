@@ -5,14 +5,17 @@ import { Mail } from "lucide-react";
 export default function ForgotPasswordPage() {
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState("");
+    const [isSuccess, setIsSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage("");
+        setIsSuccess(false);
 
         if (!email) {
             setMessage("Vui lòng nhập email");
+            setIsSuccess(false);
             return;
         }
 
@@ -34,8 +37,10 @@ export default function ForgotPasswordPage() {
             }
 
             setMessage(data.message);
+            setIsSuccess(true);
         } catch (error) {
             setMessage(error.message);
+            setIsSuccess(false);
         } finally {
             setLoading(false);
         }
@@ -84,7 +89,10 @@ export default function ForgotPasswordPage() {
                     </button>
 
                     {message && (
-                        <div className="rounded-lg bg-gray-100 px-3 py-2 text-sm text-gray-700">
+                        <div className={`rounded-lg px-3 py-2 text-sm ${isSuccess
+                            ? "bg-green-50 text-green-700"
+                            : "bg-red-50 text-red-600"
+                            }`}>
                             {message}
                         </div>
                     )}

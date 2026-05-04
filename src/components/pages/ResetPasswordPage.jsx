@@ -14,19 +14,23 @@ export default function ResetPasswordPage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage("");
+        setSuccess(false);
 
         if (!password || !confirmPassword) {
             setMessage("Vui lòng nhập đủ mật khẩu");
+            setSuccess(false);
             return;
         }
 
         if (password.length < 6) {
             setMessage("Mật khẩu phải có ít nhất 6 ký tự");
+            setSuccess(false);
             return;
         }
 
         if (password !== confirmPassword) {
             setMessage("Mật khẩu xác nhận không khớp");
+            setSuccess(false);
             return;
         }
 
@@ -53,6 +57,7 @@ export default function ResetPasswordPage() {
             setMessage(data.message);
         } catch (error) {
             setMessage(error.message);
+            setSuccess(false);
         } finally {
             setLoading(false);
         }
@@ -122,7 +127,10 @@ export default function ResetPasswordPage() {
                     </button>
 
                     {message && (
-                        <div className="rounded-lg bg-gray-100 px-3 py-2 text-sm text-gray-700">
+                        <div className={`rounded-lg px-3 py-2 text-sm ${success
+                            ? "bg-green-50 text-green-700"
+                            : "bg-red-50 text-red-600"
+                            }`}>
                             {message}
                         </div>
                     )}
