@@ -2,9 +2,10 @@ export default function CategoryCard({ title, image, count }) {
     return (
         /* Thêm class 'group' ở thẻ cha để khi hover vào cha, con sẽ thay đổi */
         <div className="group relative h-80 rounded-2xl overflow-hidden cursor-pointer">
-            <img 
-                src={image} 
-                className="w-full h-full object-cover  duration-500 group-hover:scale-110" 
+            <img
+                src={image}
+                alt={title}
+                className="w-full h-full object-cover  duration-500 group-hover:scale-110"
             />
             {/* 2. Lớp phủ đen mờ */}
             <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors"></div>

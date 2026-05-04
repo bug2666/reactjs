@@ -145,7 +145,7 @@ export default function ProductDetailPage() {
     }
 
     try {
-      const res = await fetch("${process.env.REACT_APP_API_URL}s/cart/items", {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/cart/items`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

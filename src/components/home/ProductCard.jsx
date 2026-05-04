@@ -8,6 +8,7 @@ export default function ProductCard({ name, price, category, image }) {
             <div className="relative aspect-square bg-gray-100 rounded-xl overflow-hidden mb-4 flex items-center justify-center">
                 <img
                     src={image}
+                    alt={name}
                     className="w-4/5 h-4/5 object-contain transition-transform duration-500 group-hover:scale-110"
                 />
 
