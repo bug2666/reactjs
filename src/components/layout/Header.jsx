@@ -54,64 +54,67 @@ export default function Header() {
                 </div>
 
                 <div className="flex items-center gap-9">
-                    <Link to="/cart" className="hover:text-orange-500">
-                        <ShoppingBag size={20} />
-                    </Link>
+
 
                     {user ? (
-                        <div className="relative">
-                            <button
-                                type="button"
-                                onClick={() => setOpenUserMenu(!openUserMenu)}
-                                className="flex items-center gap-2 font-bold text-gray-700 hover:text-orange-500"
-                            >
-                                <User size={20} />
-                                <span>{user.name}</span>
-                            </button>
+                        <>
+                            <Link to="/cart" className="hover:text-orange-500">
+                                <ShoppingBag size={20} />
+                            </Link>
+                            <div className="relative">
+                                <button
+                                    type="button"
+                                    onClick={() => setOpenUserMenu(!openUserMenu)}
+                                    className="flex items-center gap-2 font-bold text-gray-700 hover:text-orange-500"
+                                >
+                                    <User size={20} />
+                                    <span>{user.name}</span>
+                                </button>
 
-                            {openUserMenu && (
-                                <div className="absolute right-0 top-10 w-56 overflow-hidden rounded-xl border border-gray-100 bg-white shadow-lg">
-                                    <div className="border-b border-gray-100 px-4 py-3">
-                                        <p className="text-sm font-bold text-gray-900">
-                                            {user.name}
-                                        </p>
-                                        <p className="text-xs text-gray-500">
-                                            {user.email}
-                                        </p>
+                                {openUserMenu && (
+                                    <div className="absolute right-0 top-10 w-56 overflow-hidden rounded-xl border border-gray-100 bg-white shadow-lg">
+                                        <div className="border-b border-gray-100 px-4 py-3">
+                                            <p className="text-sm font-bold text-gray-900">
+                                                {user.name}
+                                            </p>
+                                            <p className="text-xs text-gray-500">
+                                                {user.email}
+                                            </p>
+                                        </div>
+
+                                        <Link
+                                            to="/profile"
+                                            onClick={() => setOpenUserMenu(false)}
+                                            className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-orange-500"
+                                        >
+                                            <IdCard size={17} />
+                                            Thông tin cá nhân
+                                        </Link>
+
+                                        <Link
+                                            to="/orders"
+                                            onClick={() => setOpenUserMenu(false)}
+                                            className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-orange-500"
+                                        >
+                                            <Package size={17} />
+                                            Đơn hàng
+                                        </Link>
+
+                                        <button
+                                            type="button"
+                                            onClick={handleLogout}
+                                            className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-semibold text-red-600 hover:bg-red-50"
+                                        >
+                                            <LogOut size={17} />
+                                            Đăng xuất
+                                        </button>
                                     </div>
-
-                                    <Link
-                                        to="/profile"
-                                        onClick={() => setOpenUserMenu(false)}
-                                        className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-orange-500"
-                                    >
-                                        <IdCard size={17} />
-                                        Thông tin cá nhân
-                                    </Link>
-
-                                    <Link
-                                        to="/orders"
-                                        onClick={() => setOpenUserMenu(false)}
-                                        className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:text-orange-500"
-                                    >
-                                        <Package size={17} />
-                                        Đơn hàng
-                                    </Link>
-
-                                    <button
-                                        type="button"
-                                        onClick={handleLogout}
-                                        className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-semibold text-red-600 hover:bg-red-50"
-                                    >
-                                        <LogOut size={17} />
-                                        Đăng xuất
-                                    </button>
-                                </div>
-                            )}
-                        </div>
+                                )}
+                            </div>
+                        </>
                     ) : (
-                        <Link to="/login" className="hover:text-orange-500">
-                            <User size={20} />
+                        <Link to="/login" className="text-gray-600 hover:text-black font-bold">
+                            Đăng nhập / Đăng ký
                         </Link>
                     )}
                 </div>
