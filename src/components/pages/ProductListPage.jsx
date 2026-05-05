@@ -150,12 +150,12 @@ export default function ProductListPage() {
                         </div>
 
                         <div>
-                            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            <h3 className=" mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
                                 Danh mục
                             </h3>
                             {/* render các danh mục sản phẩm để người dùng chọn */}
 
-                            <div className="space-y-2">
+                            <div className="flex items-center space-x-4">
                                 {categories.map((category) => { /* duyệt từng cate trong mảng */
                                     const isChecked = selectedCategory === category;
 
