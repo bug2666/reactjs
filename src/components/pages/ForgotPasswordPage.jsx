@@ -77,9 +77,8 @@ export default function ForgotPasswordPage() {
                                         placeholder="example@gmail.com"
                                         className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-3 outline-none focus:border-black"
                                     />
-                                    <ErrorMessage name="email" component="p" className="mt-1 text-sm text-red-500" />
-
                                 </div>
+                                <ErrorMessage name="email" component="p" className="mt-1 text-sm text-red-500" />
                             </div>
 
                             <button

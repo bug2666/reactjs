@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import axiosClient from '../../api/axiosClient';
+import { GoogleLogin } from '@react-oauth/google';
+
 
 const loginSchema = Yup.object({
     email: Yup.string()
@@ -176,13 +178,30 @@ export default function LoginForm() {
                     <div className="h-px flex-1 bg-gray-200" />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                    <button className="rounded-lg border border-gray-300 py-2 text-sm font-medium hover:bg-gray-50">
-                        Google
-                    </button>
-                    <button className="rounded-lg border border-gray-300 py-2 text-sm font-medium hover:bg-gray-50">
-                        Facebook
-                    </button>
+                <div className="gap-3">
+                    <GoogleLogin
+                        onSuccess={async (credentialResponse) => {
+                            try {
+                                const res = await axiosClient.post('/auth/google', {
+                                    credential: credentialResponse.credential
+                                });
+
+                                const data = res.data;
+
+                                localStorage.setItem('token', data.token);
+                                localStorage.setItem('user', JSON.stringify(data.user));
+
+                                window.location.href = '/';
+                            } catch (error) {
+                                setErrorMsg(error.response?.data?.message || error.message);
+                            }
+                        }}
+                        onError={() => {
+                            setErrorMsg('Đăng nhập Google thất bại');
+                        }}
+                    />
+
+          
                 </div>
 
                 <p className="mt-6 text-center text-sm text-gray-500">
