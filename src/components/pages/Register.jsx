@@ -38,7 +38,7 @@ export default function RegisterForm() {
         try {
 
             const res = await axiosClient.post('/auth/register', {
-                name: values.name.trim(),
+                name: values.userName.trim(),
                 email: values.email.trim(),
                 password: values.password.trim(),
                 phone: values.phoneNumber.trim()
