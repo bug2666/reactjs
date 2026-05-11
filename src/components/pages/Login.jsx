@@ -44,6 +44,7 @@ export default function LoginForm() {
             // nếu backend trả token/user:
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
+            window.location.href = '/';
         } catch (error) {
             setErrorMsg(error.message);
         } finally {
