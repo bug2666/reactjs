@@ -48,6 +48,45 @@ export default function AdminLayout() {
                     >
                         Quản lý đơn hàng
                     </NavLink>
+
+                    <NavLink
+                        to="/admin/users"
+                        className={({ isActive }) => {
+                            if (isActive) {
+                                return "rounded-lg bg-orange-500 px-4 py-3 font-bold text-white";
+                            }
+
+                            return "rounded-lg px-4 py-3 font-bold text-gray-600 hover:bg-gray-100 hover:text-black";
+                        }}
+                    >
+                        Quản lý người dùng
+                    </NavLink>
+
+                    <NavLink
+                        to="/admin/categories"
+                        className={({ isActive }) => {
+                            if (isActive) {
+                                return "rounded-lg bg-orange-500 px-4 py-3 font-bold text-white";
+                            }
+
+                            return "rounded-lg px-4 py-3 font-bold text-gray-600 hover:bg-gray-100 hover:text-black";
+                        }}
+                    >
+                        Quản lý danh mục
+                    </NavLink>
+
+                    <NavLink
+                        to="/admin/brands"
+                        className={({ isActive }) => {
+                            if (isActive) {
+                                return "rounded-lg bg-orange-500 px-4 py-3 font-bold text-white";
+                            }
+
+                            return "rounded-lg px-4 py-3 font-bold text-gray-600 hover:bg-gray-100 hover:text-black";
+                        }}
+                    >
+                        Quản lý thương hiệu
+                    </NavLink>
                 </nav>
             </aside>
 

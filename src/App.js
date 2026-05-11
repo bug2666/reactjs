@@ -22,6 +22,9 @@ import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboardPage from "./components/admin/AdminDashboardPage";
 import AdminProductsPage from "./components/admin/AdminProductsPage";
 import AdminOrdersPage from "./components/admin/AdminOrdersPage";
+import AdminUsersPage from "./components/admin/AdminUsersPage";
+import AdminCategoriesPage from "./components/admin/AdminCategoriesPage";
+import AdminBrandsPage from "./components/admin/AdminBrandsPage";
 
 function MainLayout() {
   return (
@@ -65,6 +68,9 @@ function App() {
               <Route index element={<AdminDashboardPage />} />
               <Route path="products" element={<AdminProductsPage />} />
               <Route path="orders" element={<AdminOrdersPage />} />
+              <Route path="users" element={<AdminUsersPage />} />
+              <Route path="categories" element={<AdminCategoriesPage />} />
+              <Route path="brands" element={<AdminBrandsPage />} />
             </Route>
           </Route>
           
