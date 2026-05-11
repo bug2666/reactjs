@@ -1,9 +1,20 @@
 import { useEffect, useState } from "react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+
+const profileSchema = Yup.object({
+    name: Yup.string()
+        .trim()
+        .required("Họ tên không được để trống"),
+
+    phone: Yup.string()
+        .trim()
+        .matches(/^(0|\+84)[0-9]{9}$/, "Số điện thoại không hợp lệ")
+        .required("Số điện thoại không được để trống")
+});
 
 export default function ProfilePage() {
     const [profile, setProfile] = useState(null);
-    const [name, setName] = useState("");
-    const [phone, setPhone] = useState("");
     const [loading, setLoading] = useState(true);
     const [message, setMessage] = useState("");
 
@@ -30,8 +41,6 @@ export default function ProfilePage() {
                 }
 
                 setProfile(data);
-                setName(data.name || "");
-                setPhone(data.phone || "");
             } catch (error) {
                 setMessage(error.message);
             } finally {
@@ -42,21 +51,29 @@ export default function ProfilePage() {
         fetchProfile();
     }, []);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async (values, helpers) => {
         setMessage("");
 
         try {
             const token = localStorage.getItem("token");
 
-            const res = await fetch(`${process.env.REACT_APP_API_URL}/users/updateMyProfile`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify({ name, phone })
-            });
+            if (!token) {
+                setMessage("Bạn cần đăng nhập");
+                return;
+            }
+
+            const res = await fetch(`${process.env.REACT_APP_API_URL}/users/updateMyProfile`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        name: values.name.trim(),
+                        phone: values.phone.trim()
+                    })
+                });
 
             const data = await res.json();
 
@@ -66,7 +83,8 @@ export default function ProfilePage() {
 
             setProfile(data.user);
 
-            const savedUser = JSON.parse(localStorage.getItem("user"));
+            const savedUser = JSON.parse(localStorage.getItem("user") || "{}");
+
             localStorage.setItem(
                 "user",
                 JSON.stringify({
@@ -79,6 +97,8 @@ export default function ProfilePage() {
             setMessage("Cập nhật thông tin thành công");
         } catch (error) {
             setMessage(error.message);
+        } finally {
+            helpers.setSubmitting(false);
         }
     };
 
@@ -103,63 +123,87 @@ export default function ProfilePage() {
             )}
 
             {profile && (
-                <form
+                <Formik
+                    initialValues={{
+                        name: profile.name || "",
+                        phone: profile.phone || ""
+                    }}
+                    validationSchema={profileSchema}
                     onSubmit={handleSubmit}
-                    className="mt-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm"
+                    enableReinitialize
                 >
-                    <div className="space-y-5">
-                        <div>
-                            <label className="mb-2 block text-sm font-bold text-gray-700">
-                                Họ tên
-                            </label>
-                            <input
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-black"
-                            />
-                        </div>
+                    {({ isSubmitting }) => (
+                        <Form className="mt-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                            <div className="space-y-5">
+                                <div>
+                                    <label className="mb-2 block text-sm font-bold text-gray-700">
+                                        Họ tên
+                                    </label>
 
-                        <div>
-                            <label className="mb-2 block text-sm font-bold text-gray-700">
-                                Email
-                            </label>
-                            <input
-                                value={profile.email}
-                                disabled
-                                className="w-full rounded-lg border border-gray-200 bg-gray-100 px-4 py-3 text-gray-500"
-                            />
-                        </div>
+                                    <Field
+                                        name="name"
+                                        className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-black"
+                                    />
 
-                        <div>
-                            <label className="mb-2 block text-sm font-bold text-gray-700">
-                                Số điện thoại
-                            </label>
-                            <input
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-black"
-                            />
-                        </div>
+                                    <ErrorMessage
+                                        name="name"
+                                        component="div"
+                                        className="mt-1 text-sm text-red-600"
+                                    />
+                                </div>
 
-                        <div>
-                            <label className="mb-2 block text-sm font-bold text-gray-700">
-                                Vai trò
-                            </label>
-                            <input
-                                value={profile.role}
-                                disabled
-                                className="w-full rounded-lg border border-gray-200 bg-gray-100 px-4 py-3 text-gray-500"
-                            />
-                        </div>
-                    </div>
+                                <div>
+                                    <label className="mb-2 block text-sm font-bold text-gray-700">
+                                        Email
+                                    </label>
 
-                    <button
-                        type="submit"
-                        className="mt-6 rounded-lg bg-orange-500 px-6 py-3 font-bold text-white hover:bg-orange-600"
-                    >
-                        Lưu thay đổi
-                    </button>
-                </form>
+                                    <input
+                                        value={profile.email || ""}
+                                        disabled
+                                        className="w-full rounded-lg border border-gray-200 bg-gray-100 px-4 py-3 text-gray-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="mb-2 block text-sm font-bold text-gray-700">
+                                        Số điện thoại
+                                    </label>
+
+                                    <Field
+                                        name="phone"
+                                        className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-black"
+                                    />
+
+                                    <ErrorMessage
+                                        name="phone"
+                                        component="div"
+                                        className="mt-1 text-sm text-red-600"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="mb-2 block text-sm font-bold text-gray-700">
+                                        Vai trò
+                                    </label>
+
+                                    <input
+                                        value={profile.role || ""}
+                                        disabled
+                                        className="w-full rounded-lg border border-gray-200 bg-gray-100 px-4 py-3 text-gray-500"
+                                    />
+                                </div>
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="mt-6 rounded-lg bg-orange-500 px-6 py-3 font-bold text-white hover:bg-orange-600 disabled:opacity-60"
+                            >
+                                {isSubmitting ? "Đang lưu..." : "Lưu thay đổi"}
+                            </button>
+                        </Form>
+                    )}
+                </Formik>
             )}
         </main>
     );

@@ -1,67 +1,57 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Lock } from "lucide-react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+
+
+const resetPasswordSchema = Yup.object({
+    password: Yup.string()
+        .min(6, "Mật khẩu tối thiểu 6 ký tự")
+        .required("Vui lòng nhập mật khẩu mới"),
+    confirmPassword: Yup.string()
+        .oneOf([Yup.ref("password")], "Mật khẩu xác nhận không khớp")
+        .required("Vui lòng xác nhận mật khẩu")
+});
+
+
 
 export default function ResetPasswordPage() {
     const { token } = useParams();
 
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
     const [message, setMessage] = useState("");
     const [success, setSuccess] = useState(false);
-    const [loading, setLoading] = useState(false);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async (values, helpers) => {
         setMessage("");
         setSuccess(false);
 
-        if (!password || !confirmPassword) {
-            setMessage("Vui lòng nhập đủ mật khẩu");
-            setSuccess(false);
-            return;
-        }
-
-        if (password.length < 6) {
-            setMessage("Mật khẩu phải có ít nhất 6 ký tự");
-            setSuccess(false);
-            return;
-        }
-
-        if (password !== confirmPassword) {
-            setMessage("Mật khẩu xác nhận không khớp");
-            setSuccess(false);
-            return;
-        }
-
         try {
-            setLoading(true);
-
             const res = await fetch(`${process.env.REACT_APP_API_URL}/auth/reset-password/${token}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({
-                    password,
-                    confirmPassword
-                })
+                body: JSON.stringify(values)
             });
 
             const data = await res.json();
+
             if (!res.ok) {
                 throw new Error(data.message || "Không đặt lại được mật khẩu");
             }
 
             setSuccess(true);
             setMessage(data.message);
+            helpers.resetForm();
         } catch (error) {
             setMessage(error.message);
             setSuccess(false);
         } finally {
-            setLoading(false);
+            helpers.setSubmitting(false);
         }
     };
+
 
     return (
         <section className="flex justify-center px-4 py-16">
@@ -75,66 +65,82 @@ export default function ResetPasswordPage() {
                     </p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-5">
-                    <div>
-                        <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                            Mật khẩu mới
-                        </label>
 
-                        <div className="relative">
-                            <Lock
-                                size={18}
-                                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                            />
+                <Formik
+                    initialValues={{
+                        password: '',
+                        confirmPassword: ''
+                    }}
+                    validationSchema={resetPasswordSchema}
+                    onSubmit={handleSubmit}
+                >
 
-                            <input
-                                type="password"
-                                placeholder="********"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-3 outline-none focus:border-black"
-                            />
-                        </div>
-                    </div>
+                    {({ isSubmitting }) => (
+                        <Form className="space-y-5">
+                            <div>
+                                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                    Mật khẩu mới
+                                </label>
 
-                    <div>
-                        <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                            Xác nhận mật khẩu
-                        </label>
+                                <div className="relative">
+                                    <Lock
+                                        size={18}
+                                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                                    />
 
-                        <div className="relative">
-                            <Lock
-                                size={18}
-                                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                            />
+                                    <Field
+                                        type="password"
+                                        name="password"
+                                        placeholder="********"
+                                        className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-3 outline-none focus:border-black"
+                                    />
+                                    <ErrorMessage name="password" component="p" className="mt-1 text-sm text-red-500" />
+                                </div>
+                            </div>
 
-                            <input
-                                type="password"
-                                placeholder="********"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-3 outline-none focus:border-black"
-                            />
-                        </div>
-                    </div>
+                            <div>
+                                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                    Xác nhận mật khẩu
+                                </label>
 
-                    <button
-                        type="submit"
-                        disabled={loading || success}
-                        className="w-full rounded-lg bg-orange-500 py-3 text-sm font-bold uppercase tracking-wider text-white transition hover:bg-orange-600"
-                    >
-                        {loading ? "Đang xử lý..." : "Đặt lại mật khẩu"}
-                    </button>
+                                <div className="relative">
+                                    <Lock
+                                        size={18}
+                                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                                    />
 
-                    {message && (
-                        <div className={`rounded-lg px-3 py-2 text-sm ${success
-                            ? "bg-green-50 text-green-700"
-                            : "bg-red-50 text-red-600"
-                            }`}>
-                            {message}
-                        </div>
+                                    <Field
+                                        type="password"
+                                        name="confirmPassword"
+                                        placeholder="********"
+                                        className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-3 outline-none focus:border-black"
+                                    />
+                                    <ErrorMessage name="confirmPassword" component="p" className="mt-1 text-sm text-red-500" />
+
+                                </div>
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={isSubmitting || success}
+                                className="w-full rounded-lg bg-orange-500 py-3 text-sm font-bold uppercase tracking-wider text-white transition hover:bg-orange-600"
+                            >
+                                {isSubmitting ? "Đang xử lý..." : "Đặt lại mật khẩu"}
+                            </button>
+
+                            {message && (
+                                <div className={`rounded-lg px-3 py-2 text-sm ${success
+                                    ? "bg-green-50 text-green-700"
+                                    : "bg-red-50 text-red-600"
+                                    }`}>
+                                    {message}
+                                </div>
+                            )}
+                        </Form>
                     )}
-                </form>
+
+
+                </Formik>
 
                 {success && (
                     <p className="mt-6 text-center text-sm text-gray-500">
@@ -144,6 +150,6 @@ export default function ResetPasswordPage() {
                     </p>
                 )}
             </div>
-        </section>
+        </section >
     );
 }

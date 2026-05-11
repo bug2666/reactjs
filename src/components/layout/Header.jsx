@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { ShoppingBag, User, LogOut, Package, IdCard } from 'lucide-react';
+import { ShoppingBag, User, LogOut, Package, IdCard, Menu, X } from 'lucide-react';
 import { Link } from "react-router-dom";
 
 export default function Header() {
     const [user, setUser] = useState(null);
     const [openUserMenu, setOpenUserMenu] = useState(false);
+
+    const [openMobileMenu, setOpenMobileMenu] = useState(false);
 
     useEffect(() => {
         const savedUser = localStorage.getItem('user');
@@ -34,12 +36,12 @@ export default function Header() {
 
 
     return (
-        <header className="fixed top-0 left-0 right-0 z-50 border-b border-gray-700 bg-white/90 backdrop-blur-md h-20">
-            <nav className="flex items-center h-full justify-between px-20">
-
+        <header className="fixed top-0 left-0 right-0 z-50 border-b border-gray-700 bg-white/90 backdrop-blur-md">
+            <nav className="flex h-20 items-center justify-between px-4 md:px-8 lg:px-20">
                 <div className="text-2xl uppercase font-black">Logo</div>
 
-                <div className="flex items-center gap-9">
+                <div className="hidden items-center gap-9 md:flex">
+
                     <Link className="text-gray-600 hover:text-black font-bold" to="/">
                         Home
                     </Link>
@@ -53,9 +55,7 @@ export default function Header() {
                     </Link>
                 </div>
 
-                <div className="flex items-center gap-9">
-
-
+                <div className="hidden items-center gap-9 md:flex">
                     {user ? (
                         <>
                             <Link to="/cart" className="hover:text-orange-500">
@@ -118,7 +118,89 @@ export default function Header() {
                         </Link>
                     )}
                 </div>
+
+                <button
+                    type="button"
+                    onClick={() => setOpenMobileMenu(!openMobileMenu)}
+                    className="md:hidden"
+                >
+                    {openMobileMenu ? <X size={24} /> : <Menu size={24} />}
+                </button>
             </nav>
+
+            {openMobileMenu && (
+                <div className="border-t border-gray-200 bg-white px-4 py-4 md:hidden">
+                    <div className="flex flex-col gap-4">
+                        <Link
+                            to="/"
+                            onClick={() => setOpenMobileMenu(false)}
+                            className="font-bold text-gray-600 hover:text-black"
+                        >
+                            Home
+                        </Link>
+
+                        <Link
+                            to="/ProductListPage"
+                            onClick={() => setOpenMobileMenu(false)}
+                            className="font-bold text-gray-600 hover:text-black"
+                        >
+                            Products
+                        </Link>
+
+                        <Link
+                            to="/contact"
+                            onClick={() => setOpenMobileMenu(false)}
+                            className="font-bold text-gray-600 hover:text-black"
+                        >
+                            Contact
+                        </Link>
+
+                        {user ? (
+                            <>
+                                <Link
+                                    to="/cart"
+                                    onClick={() => setOpenMobileMenu(false)}
+                                    className="font-bold text-gray-600 hover:text-black"
+                                >
+                                    Giỏ hàng
+                                </Link>
+
+                                <Link
+                                    to="/profile"
+                                    onClick={() => setOpenMobileMenu(false)}
+                                    className="font-bold text-gray-600 hover:text-black"
+                                >
+                                    Thông tin cá nhân
+                                </Link>
+
+                                <Link
+                                    to="/orders"
+                                    onClick={() => setOpenMobileMenu(false)}
+                                    className="font-bold text-gray-600 hover:text-black"
+                                >
+                                    Đơn hàng
+                                </Link>
+
+                                <button
+                                    type="button"
+                                    onClick={handleLogout}
+                                    className="text-left font-bold text-red-600"
+                                >
+                                    Đăng xuất
+                                </button>
+                            </>
+                        ) : (
+                            <Link
+                                to="/login"
+                                onClick={() => setOpenMobileMenu(false)}
+                                className="font-bold text-gray-600 hover:text-black"
+                            >
+                                Đăng nhập / Đăng ký
+                            </Link>
+                        )}
+                    </div>
+                </div>
+            )}
         </header>
     );
 }
