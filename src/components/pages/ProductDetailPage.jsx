@@ -133,13 +133,11 @@ export default function ProductDetailPage() {
     }
 
     try {
-      const res = await axiosClient.post('/cart/items', {
+      await axiosClient.post('/cart/items', {
         productId: product.id,
         variantId: selectedVariant.id,
         quantity
       });
-
-      const data = await res.data;
 
       setMessage("Đã thêm sản phẩm vào giỏ hàng");
     } catch (error) {

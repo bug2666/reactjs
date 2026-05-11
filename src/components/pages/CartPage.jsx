@@ -38,8 +38,6 @@ export default function CartPage() {
         if (quantity <= 0) return;
 
         try {
-            const token = localStorage.getItem("token");
-
             const res = await axiosClient.put(`/cart/items/${variantId}`, {
                 quantity
             });
@@ -54,8 +52,6 @@ export default function CartPage() {
 
     const deleteItem = async (variantId) => {
         try {
-            const token = localStorage.getItem("token");
-
             const res = await axiosClient.delete(`/cart/items/${variantId}`);
 
 

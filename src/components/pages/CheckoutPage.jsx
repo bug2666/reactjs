@@ -36,8 +36,6 @@ export default function CheckoutPage() {
             });
 
 
-            const data = res.data;
-
             navigate("/orders");
         } catch (error) {
             setMessage(error.response?.data?.message || error.message);

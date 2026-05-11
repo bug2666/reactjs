@@ -47,8 +47,6 @@ export default function AdminOrdersPage() {
         try {
             setMessage("");
 
-            const token = localStorage.getItem("token");
-
             const res = await axiosClient.put(`/orders/admin/${orderId}/status`, {
                 status
             });

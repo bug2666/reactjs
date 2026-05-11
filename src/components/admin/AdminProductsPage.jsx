@@ -64,7 +64,7 @@ export default function AdminProductsPage() {
         try {
             setMessage("");
 
-            const res = await axiosClient.delete(`/products/deleteProduct/${productId}`);
+            await axiosClient.delete(`/products/deleteProduct/${productId}`);
 
             setProducts((currentProducts) => {
                 return currentProducts.filter((product) => {
