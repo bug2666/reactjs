@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import axiosClient from "../../api/axiosClient";
+
 
 export default function OrdersPage() {
     const [orders, setOrders] = useState([]);
@@ -12,15 +14,8 @@ export default function OrdersPage() {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const token = localStorage.getItem("token");
-
-                const res = await fetch(`${process.env.REACT_APP_API_URL}/orders/my-orders`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-
-                const data = await res.json();
+                const res = await axiosClient.get('/orders/my-orders');
+                const data = res.data;
 
                 if (!res.ok) {
                     throw new Error(data.message || "Không lấy được đơn hàng");
@@ -28,7 +23,7 @@ export default function OrdersPage() {
 
                 setOrders(data);
             } catch (error) {
-                setMessage(error.message);
+                setMessage(error.response?.data?.message || error.message);
             } finally {
                 setLoading(false);
             }

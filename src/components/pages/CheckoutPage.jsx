@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import axiosClient from "../../api/axiosClient";
+
 
 const checkoutSchema = Yup.object({
     shippingName: Yup.string()
@@ -26,31 +28,19 @@ export default function CheckoutPage() {
 
         try {
 
-            const token = localStorage.getItem("token");
-
-            const res = await fetch(`${process.env.REACT_APP_API_URL}/orders`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    shippingName: values.shippingName,
-                    shippingPhone: values.shippingPhone,
-                    shippingAddress: values.shippingAddress,
-                    paymentMethod: values.paymentMethod
-                })
+            const res = await axiosClient.post('/orders', {
+                shippingName: values.shippingName,
+                shippingPhone: values.shippingPhone,
+                shippingAddress: values.shippingAddress,
+                paymentMethod: values.paymentMethod
             });
 
-            const data = await res.json();
 
-            if (!res.ok) {
-                throw new Error(data.message || "Đặt hàng thất bại");
-            }
+            const data = res.data;
 
             navigate("/orders");
         } catch (error) {
-            setMessage(error.message);
+            setMessage(error.response?.data?.message || error.message);
         } finally {
             helpers.setSubmitting(false);
         }

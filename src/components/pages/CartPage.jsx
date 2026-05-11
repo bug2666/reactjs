@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Trash2, Minus, Plus } from "lucide-react";
+import axiosClient from "../../api/axiosClient";
 
 export default function CartPage() {
     const [cart, setCart] = useState(null);
@@ -15,30 +16,15 @@ export default function CartPage() {
         try {
             setLoading(true);
             setMessage("");
+            
+            const res = await axiosClient.get('/cart');
 
-            const token = localStorage.getItem("token");
 
-            if (!token) {
-                setMessage("Bạn cần đăng nhập để xem giỏ hàng");
-                setCart(null);
-                return;
-            }
-
-            const res = await fetch(`${process.env.REACT_APP_API_URL}/cart`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data.message || "Không thể lấy giỏ hàng");
-            }
+            const data = res.data;
 
             setCart(data);
         } catch (error) {
-            setMessage(error.message);
+            setMessage(error.response?.data?.message || error.message);
         } finally {
             setLoading(false);
         }
@@ -54,24 +40,15 @@ export default function CartPage() {
         try {
             const token = localStorage.getItem("token");
 
-            const res = await fetch(`${process.env.REACT_APP_API_URL}/cart/items/${variantId}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify({ quantity })
+            const res = await axiosClient.put(`/cart/items/${variantId}`, {
+                quantity
             });
 
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data.message || "Không thể cập nhật giỏ hàng");
-            }
+            const data = res.data;
 
             setCart(data);
         } catch (error) {
-            setMessage(error.message);
+            setMessage(error.response?.data?.message || error.message);
         }
     };
 
@@ -79,22 +56,14 @@ export default function CartPage() {
         try {
             const token = localStorage.getItem("token");
 
-            const res = await fetch(`${process.env.REACT_APP_API_URL}/cart/items/${variantId}`, {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
+            const res = await axiosClient.delete(`/cart/items/${variantId}`);
 
-            const data = await res.json();
 
-            if (!res.ok) {
-                throw new Error(data.message || "Không thể xóa sản phẩm");
-            }
+            const data = res.data;
 
             setCart(data);
         } catch (error) {
-            setMessage(error.message);
+            setMessage(error.response?.data?.message || error.message);
         }
     };
 

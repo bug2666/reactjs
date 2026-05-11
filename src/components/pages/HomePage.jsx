@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import HeroSection from "../home/HeroSection";
 import CategorySection from "../home/CategorySection";
 import FeaturedProductsSection from "../home/FeaturedProductsSection";
+import axiosClient from "../../api/axiosClient";
+
 
 export default function HomePage() {
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -16,12 +18,8 @@ export default function HomePage() {
         setLoadingProducts(true);
         setProductError("");
 
-        const res = await fetch(`${process.env.REACT_APP_API_URL}/products/getProducts`);
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.message || "Không lấy được sản phẩm nổi bật");
-        }
+        const res = await axiosClient.get('/products/getProducts');
+        const data = res.data;
 
         setFeaturedProducts(data.slice(0, 8));
 
@@ -43,10 +41,10 @@ export default function HomePage() {
         });
         setCategories(categoryList);
 
-        
+
 
       } catch (error) {
-        setProductError(error.message);
+        setProductError(error.response?.data?.message || error.message);
       } finally {
         setLoadingProducts(false);
       }

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import axiosClient from "../../api/axiosClient";
+
 
 const profileSchema = Yup.object({
     name: Yup.string()
@@ -21,28 +23,12 @@ export default function ProfilePage() {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const token = localStorage.getItem("token");
-
-                if (!token) {
-                    setMessage("Bạn cần đăng nhập");
-                    return;
-                }
-
-                const res = await fetch(`${process.env.REACT_APP_API_URL}/users/profile`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-
-                const data = await res.json();
-
-                if (!res.ok) {
-                    throw new Error(data.message || "Không lấy được thông tin cá nhân");
-                }
+                const res = await axiosClient.get('/users/profile');
+                const data = res.data;
 
                 setProfile(data);
             } catch (error) {
-                setMessage(error.message);
+                setMessage(error.response?.data?.message || error.message);
             } finally {
                 setLoading(false);
             }
@@ -55,31 +41,14 @@ export default function ProfilePage() {
         setMessage("");
 
         try {
-            const token = localStorage.getItem("token");
 
-            if (!token) {
-                setMessage("Bạn cần đăng nhập");
-                return;
-            }
+            const res = await axiosClient.put('/users/updateMyProfile', {
+                fullName: values.fullName,
+                phone: values.phone,
+                address: values.address
+            });
 
-            const res = await fetch(`${process.env.REACT_APP_API_URL}/users/updateMyProfile`,
-                {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        name: values.name.trim(),
-                        phone: values.phone.trim()
-                    })
-                });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data.message || "Không cập nhật được thông tin");
-            }
+            const data = res.data;
 
             setProfile(data.user);
 
@@ -96,7 +65,7 @@ export default function ProfilePage() {
 
             setMessage("Cập nhật thông tin thành công");
         } catch (error) {
-            setMessage(error.message);
+            setMessage(error.response?.data?.message || error.message);
         } finally {
             helpers.setSubmitting(false);
         }

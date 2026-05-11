@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { ShoppingBag, User, LogOut, Package, IdCard, Menu, X } from 'lucide-react';
 import { Link } from "react-router-dom";
+import axiosClient from '../../api/axiosClient';
+
 
 export default function Header() {
     const [user, setUser] = useState(null);
@@ -17,14 +19,9 @@ export default function Header() {
     }, []);
 
     const handleLogout = async () => {
-        const token = localStorage.getItem('token');
+
         try {
-            await fetch(`${process.env.REACT_APP_API_URL}/auth/logout`, {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
+            await axiosClient.post('/auth/logout');
         } finally {
             localStorage.removeItem('token');
             localStorage.removeItem('user');

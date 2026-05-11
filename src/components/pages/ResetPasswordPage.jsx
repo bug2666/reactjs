@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { Lock } from "lucide-react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-
+import axiosClient from "../../api/axiosClient";
 
 const resetPasswordSchema = Yup.object({
     password: Yup.string()
@@ -27,25 +27,17 @@ export default function ResetPasswordPage() {
         setSuccess(false);
 
         try {
-            const res = await fetch(`${process.env.REACT_APP_API_URL}/auth/reset-password/${token}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(values)
+            const res = await axiosClient.post(`/auth/reset-password/${token}`, {
+                password: values.password
             });
 
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data.message || "Không đặt lại được mật khẩu");
-            }
+            const data = res.data;
 
             setSuccess(true);
             setMessage(data.message);
             helpers.resetForm();
         } catch (error) {
-            setMessage(error.message);
+            setMessage(error.response?.data?.message || error.message);
             setSuccess(false);
         } finally {
             helpers.setSubmitting(false);

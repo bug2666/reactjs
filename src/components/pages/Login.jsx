@@ -3,7 +3,7 @@ import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-
+import axiosClient from '../../api/axiosClient';
 
 const loginSchema = Yup.object({
     email: Yup.string()
@@ -26,27 +26,19 @@ export default function LoginForm() {
         setErrorMsg('');
 
         try {
-            const res = await fetch(`${process.env.REACT_APP_API_URL}/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: values.email.trim(),
-                    password: values.password.trim()
-                }),
+            const res = await axiosClient.post('/auth/login', {
+                email: values.email,
+                password: values.password
             });
 
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data?.message || 'Đăng nhập thất bại');
-            }
+            const data = res.data;
 
             // nếu backend trả token/user:
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
             window.location.href = '/';
         } catch (error) {
-            setErrorMsg(error.message);
+            setErrorMsg(error.response?.data?.message || error.message);
         } finally {
             setSubmitting(false);
         }

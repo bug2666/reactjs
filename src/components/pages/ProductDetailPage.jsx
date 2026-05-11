@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import axiosClient from "../../api/axiosClient";
+
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -16,15 +18,8 @@ export default function ProductDetailPage() {
       try {
         setLoading(true);
 
-        const res = await fetch(
-          `${process.env.REACT_APP_API_URL}/products/getProductById/${id}`
-        );
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.message || "Không thể tải sản phẩm");
-        }
+        const res = await axiosClient.get(`/products/getProductById/${id}`);
+        const data = res.data;
 
         setProduct(data);
 
@@ -42,7 +37,7 @@ export default function ProductDetailPage() {
           setSelectedVariant(data.variants[0]);
         }
       } catch (error) {
-        setMessage(error.message);
+        setMessage(error.response?.data?.message || error.message);
       } finally {
         setLoading(false);
       }
@@ -132,41 +127,23 @@ export default function ProductDetailPage() {
   const handleAddToCart = async () => {
     setMessage("");
 
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      setMessage("Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng");
-      return;
-    }
-
     if (!selectedVariant) {
       setMessage("Vui lòng chọn size và màu");
       return;
     }
 
     try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/cart/items`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          productId: product.id,
-          variantId: selectedVariant.id,
-          quantity
-        })
+      const res = await axiosClient.post('/cart/items', {
+        productId: product.id,
+        variantId: selectedVariant.id,
+        quantity
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Không thể thêm vào giỏ hàng");
-      }
+      const data = await res.data;
 
       setMessage("Đã thêm sản phẩm vào giỏ hàng");
     } catch (error) {
-      setMessage(error.message);
+      setMessage(error.response?.data?.message || error.message);
     }
   };
 

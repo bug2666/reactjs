@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import axiosClient from '../../api/axiosClient';
 
 const orderStatuses = [
     { value: "pending", label: "Chờ xử lý" },
@@ -27,23 +28,13 @@ export default function AdminOrdersPage() {
                 setLoading(true);
                 setMessage("");
 
-                const token = localStorage.getItem("token");
+                const res = await axiosClient.get(`/orders/admin/all`);
 
-                const res = await fetch(`${process.env.REACT_APP_API_URL}/orders/admin/all`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-
-                const data = await res.json();
-
-                if (!res.ok) {
-                    throw new Error(data.message || "Không lấy được danh sách đơn hàng");
-                }
+                const data = res.data;
 
                 setOrders(data);
             } catch (error) {
-                setMessage(error.message);
+                setMessage(error.response?.data?.message || error.message);
             } finally {
                 setLoading(false);
             }
@@ -58,20 +49,11 @@ export default function AdminOrdersPage() {
 
             const token = localStorage.getItem("token");
 
-            const res = await fetch(`${process.env.REACT_APP_API_URL}/orders/admin/${orderId}/status`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify({ status })
+            const res = await axiosClient.put(`/orders/admin/${orderId}/status`, {
+                status
             });
 
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data.message || "Không cập nhật được trạng thái đơn hàng");
-            }
+            const data = res.data;
 
             setOrders((currentOrders) => {
                 return currentOrders.map((order) => {
@@ -85,7 +67,7 @@ export default function AdminOrdersPage() {
 
             setMessage("Cập nhật trạng thái đơn hàng thành công");
         } catch (error) {
-            setMessage(error.message);
+            setMessage(error.response?.data?.message || error.message);
         }
     };
 

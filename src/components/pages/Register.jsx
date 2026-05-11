@@ -3,7 +3,7 @@ import { User, Mail, Phone, Lock, Eye, EyeOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-
+import axiosClient from '../../api/axiosClient';
 
 
 const registerSchema = Yup.object({
@@ -36,22 +36,14 @@ export default function RegisterForm() {
         setErrorMsg('');
 
         try {
-            const res = await fetch(`${process.env.REACT_APP_API_URL}/auth/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name: values.userName.trim(),
-                    email: values.email.trim(),
-                    password: values.password.trim(),
-                    phone: values.phoneNumber.trim()
-                })
+
+            const res = await axiosClient.post('/auth/register', {
+                name: values.name.trim(),
+                email: values.email.trim(),
+                password: values.password.trim(),
+                phone: values.phoneNumber.trim()
             });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data?.message || 'Đăng ký thất bại');
-            }
+            const data = res.data;
 
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
@@ -59,7 +51,7 @@ export default function RegisterForm() {
 
             window.location.href = '/';
         } catch (error) {
-            setErrorMsg(error.message);
+            setErrorMsg(error.response?.data?.message || error.message);
         } finally {
             helpers.setSubmitting(false);
         }

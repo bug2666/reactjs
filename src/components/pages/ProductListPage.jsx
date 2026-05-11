@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Search, ShoppingCart, Heart, SlidersHorizontal } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
+import axiosClient from '../../api/axiosClient';
 
 
 export default function ProductListPage() {
@@ -19,16 +19,12 @@ export default function ProductListPage() {
                 setLoading(true);
                 setErrorMsg('');
 
-                const res = await fetch(`${process.env.REACT_APP_API_URL}/products/getProducts`);
-                const data = await res.json();
-
-                if (!res.ok) {
-                    throw new Error(data?.message || 'Không lấy được danh sách sản phẩm');
-                }
+                const res = await axiosClient.get('/products/getProducts');
+                const data = res.data;
 
                 setProducts(data);
             } catch (error) {
-                setErrorMsg(error.message);
+                setErrorMsg(error.response?.data?.message || error.message);
             } finally {
                 setLoading(false);
             }
@@ -181,7 +177,7 @@ export default function ProductListPage() {
                             <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
                                 Thương hiệu
                             </h3>
-                                {/* render thương hiệu */}
+                            {/* render thương hiệu */}
                             <div className="space-y-2">
                                 {brands.map((brand) => {
                                     let isChecked = false;

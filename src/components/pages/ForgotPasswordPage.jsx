@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { Mail } from "lucide-react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import axiosClient from "../../api/axiosClient";
+
 
 const forgotPasswordSchema = Yup.object({
     email: Yup.string()
@@ -20,26 +22,18 @@ export default function ForgotPasswordPage() {
         setIsSuccess(false);
 
         try {
-            const res = await fetch(`${process.env.REACT_APP_API_URL}/auth/forgot-password`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ email: values.email.trim() })
+            const res = await axiosClient.post('/auth/forgot-password', {
+                email: values.email
             });
 
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data.message || "Không gửi được email");
-            }
+            const data = res.data;
 
             setIsSuccess(true);
             setMessage(data.message);
             helpers.resetForm();
         } catch (error) {
             setIsSuccess(false);
-            setMessage(error.message);
+            setMessage(error.response?.data?.message || error.message);
         } finally {
             helpers.setSubmitting(false);
         }

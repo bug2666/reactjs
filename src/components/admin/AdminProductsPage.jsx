@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import axiosClient from '../../api/axiosClient';
 
 
 const productSchema = Yup.object({
@@ -39,23 +40,11 @@ export default function AdminProductsPage() {
                 setLoading(true);
                 setMessage("");
 
-                const token = localStorage.getItem("token");
+                const res = await axiosClient.get('/products/getProducts');
 
-                const res = await fetch(`${process.env.REACT_APP_API_URL}/products/getProducts`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-
-                const data = await res.json();
-
-                if (!res.ok) {
-                    throw new Error(data.message || "Không lấy được danh sách sản phẩm");
-                }
-
-                setProducts(data);
+                setProducts(res.data);
             } catch (error) {
-                setMessage(error.message);
+                setMessage(error.response?.data?.message || error.message);
             } finally {
                 setLoading(false);
             }
@@ -75,20 +64,7 @@ export default function AdminProductsPage() {
         try {
             setMessage("");
 
-            const token = localStorage.getItem("token");
-
-            const res = await fetch(`${process.env.REACT_APP_API_URL}/products/deleteProduct/${productId}`, {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data.message || "Không xóa được sản phẩm");
-            }
+            const res = await axiosClient.delete(`/products/deleteProduct/${productId}`);
 
             setProducts((currentProducts) => {
                 return currentProducts.filter((product) => {
@@ -97,7 +73,7 @@ export default function AdminProductsPage() {
             });
             setMessage("Xóa sản phẩm thành công");
         } catch (error) {
-            setMessage(error.message);
+            setMessage(error.response?.data?.message || error.message);
         }
     };
 
@@ -136,39 +112,23 @@ export default function AdminProductsPage() {
     const handleSubmitProduct = async (values, helpers) => {
         try {
             setMessage("");
-
-            const token = localStorage.getItem("token");
             const isEditing = Boolean(editingProduct);
+            const payload = {
+                name: values.name.trim(),
+                description: values.description.trim(),
+                categoryId: Number(values.categoryId),
+                brandId: Number(values.brandId),
+                basePrice: Number(values.basePrice),
+                isActive: Number(values.isActive)
+            };
 
-            let url = `${process.env.REACT_APP_API_URL}/products/createProduct`;
-            let method = "POST";
+            let res = await axiosClient.post(`/products/createProduct`, payload);
 
             if (isEditing) {
-                url = `${process.env.REACT_APP_API_URL}/products/updateProduct/${editingProduct.id}`;
-                method = "PUT";
+                res = await axiosClient.put(`/products/updateProduct/${editingProduct.id}`, payload);
             }
 
-            const res = await fetch(url, {
-                method,
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    name: values.name.trim(),
-                    description: values.description.trim(),
-                    categoryId: Number(values.categoryId),
-                    brandId: Number(values.brandId),
-                    basePrice: Number(values.basePrice),
-                    isActive: Number(values.isActive)
-                })
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data.message || "Không lưu được sản phẩm");
-            }
+            const data = res.data;
 
             if (isEditing) {
                 setProducts((currentProducts) => {
@@ -194,7 +154,7 @@ export default function AdminProductsPage() {
             setEditingProduct(null);
             helpers.resetForm();
         } catch (error) {
-            setMessage(error.message);
+            setMessage(error.response?.data?.message || error.message);
         } finally {
             helpers.setSubmitting(false);
         }
