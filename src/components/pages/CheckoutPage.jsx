@@ -28,7 +28,7 @@ export default function CheckoutPage() {
 
         try {
 
-            const res = await axiosClient.post('/orders', {
+            await axiosClient.post('/orders', {
                 shippingName: values.shippingName,
                 shippingPhone: values.shippingPhone,
                 shippingAddress: values.shippingAddress,
