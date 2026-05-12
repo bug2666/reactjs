@@ -6,6 +6,16 @@ import axiosClient from '../../api/axiosClient';
 
 export default function ProductListPage() {
     const [products, setProducts] = useState([]);
+
+    const [page, setPage] = useState(1);
+    const [pagination, setPagination] = useState({
+        page: 1,
+        limit: 12,
+        totalItems: 0,
+        totalPages: 1
+    });
+
+
     const [loading, setLoading] = useState(true);
     const [errorMsg, setErrorMsg] = useState('');
 
@@ -22,7 +32,9 @@ export default function ProductListPage() {
                 const res = await axiosClient.get('/products/getProducts');
                 const data = res.data;
 
-                setProducts(data);
+                setProducts(data.products);
+                setPagination(data.pagination);
+
             } catch (error) {
                 setErrorMsg(error.response?.data?.message || error.message);
             } finally {
@@ -31,7 +43,7 @@ export default function ProductListPage() {
         };
 
         fetchProducts();
-    }, []);
+    }, [page]);
 
     const categories = [];
     products.forEach((product) => {
@@ -98,7 +110,7 @@ export default function ProductListPage() {
                     </div>
 
                     <p className="text-sm font-semibold text-gray-500">
-                        Hiển thị {filteredProducts.length} sản phẩm
+                        Hiển thị {filteredProducts.length} / {pagination.totalItems} sản phẩm
                     </p>
                 </div>
             </section>
@@ -314,6 +326,46 @@ export default function ProductListPage() {
                         </div>
                     )}
                 </section>
+                {!loading && !errorMsg && pagination.totalPages > 1 && (
+                    <div className="mt-8 flex justify-center gap-2">
+                        <button
+                            type="button"
+                            disabled={page === 1}
+                            onClick={() => setPage(page - 1)}
+                            className="rounded border px-3 py-2 disabled:opacity-50"
+                        >
+                            Trước
+                        </button>
+
+                        {Array.from({ length: pagination.totalPages }, (_, index) => {
+                            const pageNumber = index + 1;
+
+                            return (
+                                <button
+                                    key={pageNumber}
+                                    type="button"
+                                    onClick={() => setPage(pageNumber)}
+                                    className={
+                                        page === pageNumber
+                                            ? "rounded bg-black px-3 py-2 text-white"
+                                            : "rounded border px-3 py-2"
+                                    }
+                                >
+                                    {pageNumber}
+                                </button>
+                            );
+                        })}
+
+                        <button
+                            type="button"
+                            disabled={page === pagination.totalPages}
+                            onClick={() => setPage(page + 1)}
+                            className="rounded border px-3 py-2 disabled:opacity-50"
+                        >
+                            Sau
+                        </button>
+                    </div>
+                )}
             </section>
         </main>
     );

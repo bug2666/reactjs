@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import axiosClient from '../../api/axiosClient';
@@ -38,6 +38,13 @@ export default function AdminProductsPage() {
     const [variantValues, setVariantValues] = useState(variantInitialValues);
     const [editingImage, setEditingImage] = useState(null);
     const [imageValues, setImageValues] = useState(imageInitialValues);
+    const [page, setPage] = useState(1);
+    const [pagination, setPagination] = useState({
+        page: 1,
+        limit: 10,
+        totalItems: 0,
+        totalPages: 1
+    });
 
     const updateProductInState = (updatedProduct) => {
         setProducts((currentProducts) => {
@@ -51,18 +58,19 @@ export default function AdminProductsPage() {
         });
     };
 
-    const fetchInitialData = async () => {
+    const fetchInitialData = useCallback(async () => {
         try {
             setLoading(true);
             setMessage("");
 
             const [productsRes, categoriesRes, brandsRes] = await Promise.all([
-                axiosClient.get('/products/getProducts'),
+                axiosClient.get(`/products/getProducts?page=${page}&limit=10`),
                 axiosClient.get('/admin/categories'),
                 axiosClient.get('/admin/brands')
             ]);
 
-            setProducts(productsRes.data);
+            setProducts(productsRes.data.products);
+            setPagination(productsRes.data.pagination);
             setCategories(categoriesRes.data);
             setBrands(brandsRes.data);
         } catch (error) {
@@ -70,11 +78,11 @@ export default function AdminProductsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [page]);
 
     useEffect(() => {
         fetchInitialData();
-    }, []);
+    }, [fetchInitialData]);
 
     const handleDeleteProduct = async (productId) => {
         const confirmed = window.confirm("Bạn có chắc muốn xóa sản phẩm này?");
@@ -357,6 +365,10 @@ export default function AdminProductsPage() {
 
             {!loading && products.length > 0 && (
                 <div className="mt-6 space-y-4">
+                    <div className="rounded-xl bg-white p-4 text-sm font-semibold text-gray-600 shadow-sm">
+                        Hiển thị {products.length} / {pagination.totalItems} sản phẩm
+                    </div>
+
                     {products.map((product) => (
                         <div key={product.id} className="overflow-hidden rounded-xl bg-white shadow-sm">
                             <div className="overflow-x-auto">
@@ -494,6 +506,47 @@ export default function AdminProductsPage() {
                             )}
                         </div>
                     ))}
+
+                    {pagination.totalPages > 1 && (
+                        <div className="flex items-center justify-center gap-2 rounded-xl bg-white p-4 shadow-sm">
+                            <button
+                                type="button"
+                                disabled={page === 1}
+                                onClick={() => setPage(page - 1)}
+                                className="rounded-lg border border-gray-200 px-3 py-2 font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                Trước
+                            </button>
+
+                            {Array.from({ length: pagination.totalPages }, (_, index) => {
+                                const pageNumber = index + 1;
+
+                                return (
+                                    <button
+                                        key={pageNumber}
+                                        type="button"
+                                        onClick={() => setPage(pageNumber)}
+                                        className={
+                                            page === pageNumber
+                                                ? "rounded-lg bg-orange-500 px-3 py-2 font-bold text-white"
+                                                : "rounded-lg border border-gray-200 px-3 py-2 font-semibold text-gray-700 hover:bg-gray-50"
+                                        }
+                                    >
+                                        {pageNumber}
+                                    </button>
+                                );
+                            })}
+
+                            <button
+                                type="button"
+                                disabled={page === pagination.totalPages}
+                                onClick={() => setPage(page + 1)}
+                                className="rounded-lg border border-gray-200 px-3 py-2 font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                Sau
+                            </button>
+                        </div>
+                    )}
                 </div>
             )}
         </section>

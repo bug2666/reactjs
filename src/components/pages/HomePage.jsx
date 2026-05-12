@@ -18,10 +18,11 @@ export default function HomePage() {
         setLoadingProducts(true);
         setProductError("");
 
-        const res = await axiosClient.get('/products/getProducts');
-        const data = res.data;
+        const res = await axiosClient.get('/products/getProducts?page=1&limit=8');
+        const data = res.data.products;
 
-        setFeaturedProducts(data.slice(0, 8));
+        setFeaturedProducts(data);
+
 
         const categoryList = [];
         data.forEach((product) => {
