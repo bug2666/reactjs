@@ -5,14 +5,22 @@ export default function AdminUsersPage() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [message, setMessage] = useState("");
+    const [page, setPage] = useState(1);
+    const [pagination, setPagination] = useState({
+        page: 1,
+        limit: 10,
+        totalItems: 0,
+        totalPages: 1
+    });
 
     const fetchUsers = async () => {
         try {
             setLoading(true);
             setMessage("");
 
-            const res = await axiosClient.get('/admin/users');
-            setUsers(res.data);
+            const res = await axiosClient.get(`/admin/users?page=${page}&limit=10`);
+            setUsers(res.data.users);
+            setPagination(res.data.pagination);
         } catch (error) {
             setMessage(error.response?.data?.message || error.message);
         } finally {
@@ -22,7 +30,7 @@ export default function AdminUsersPage() {
 
     useEffect(() => {
         fetchUsers();
-    }, []);
+    }, [page]);
 
     const handleUpdateRole = async (userId, role) => {
         try {
@@ -90,6 +98,9 @@ export default function AdminUsersPage() {
 
             {!loading && (
                 <div className="mt-6 overflow-hidden rounded-xl bg-white shadow-sm">
+                    <div className="border-b border-gray-100 px-4 py-3 text-sm font-semibold text-gray-600">
+                        Hiển thị {users.length} / {pagination.totalItems} người dùng
+                    </div>
                     <div className="overflow-x-auto">
                         <table className="w-full min-w-[800px] text-left text-sm">
                             <thead className="bg-gray-100 text-xs uppercase text-gray-500">
@@ -133,6 +144,46 @@ export default function AdminUsersPage() {
                             </tbody>
                         </table>
                     </div>
+                    {pagination.totalPages > 1 && (
+                        <div className="flex items-center justify-center gap-2 border-t border-gray-100 p-4">
+                            <button
+                                type="button"
+                                disabled={page === 1}
+                                onClick={() => setPage(page - 1)}
+                                className="rounded-lg border border-gray-200 px-3 py-2 font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                Trước
+                            </button>
+
+                            {Array.from({ length: pagination.totalPages }, (_, index) => {
+                                const pageNumber = index + 1;
+
+                                return (
+                                    <button
+                                        key={pageNumber}
+                                        type="button"
+                                        onClick={() => setPage(pageNumber)}
+                                        className={
+                                            page === pageNumber
+                                                ? "rounded-lg bg-orange-500 px-3 py-2 font-bold text-white"
+                                                : "rounded-lg border border-gray-200 px-3 py-2 font-semibold text-gray-700 hover:bg-gray-50"
+                                        }
+                                    >
+                                        {pageNumber}
+                                    </button>
+                                );
+                            })}
+
+                            <button
+                                type="button"
+                                disabled={page === pagination.totalPages}
+                                onClick={() => setPage(page + 1)}
+                                className="rounded-lg border border-gray-200 px-3 py-2 font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                Sau
+                            </button>
+                        </div>
+                    )}
                 </div>
             )}
         </section>

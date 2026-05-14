@@ -29,7 +29,7 @@ export default function ProductListPage() {
                 setLoading(true);
                 setErrorMsg('');
 
-                const res = await axiosClient.get('/products/getProducts');
+                const res = await axiosClient.get(`/products/getProducts?page=${page}&limit=12`);
                 const data = res.data;
 
                 setProducts(data.products);
