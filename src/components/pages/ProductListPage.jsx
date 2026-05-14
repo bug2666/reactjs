@@ -23,6 +23,18 @@ export default function ProductListPage() {
     const [selectedCategory, setSelectedCategory] = useState('');
     const [selectedBrand, setSelectedBrand] = useState('');
 
+    const getImageSrc = (imageUrl) => {
+        if (!imageUrl) {
+            return "";
+        }
+
+        if (imageUrl.startsWith("http")) {
+            return imageUrl;
+        }
+
+        return `${process.env.REACT_APP_API_URL.replace('/api', '')}${imageUrl}`;
+    };
+
     useEffect(() => {
         const fetchProducts = async () => {
             try {
@@ -270,7 +282,7 @@ export default function ProductListPage() {
                                     <div className="relative flex aspect-square items-center justify-center bg-gray-50 p-8">
                                         <Link to={`/products/${product.id}`} className="h-full w-full">
                                             <img
-                                                src={product.imageUrl}
+                                                src={getImageSrc(product.imageUrl)}
                                                 alt={product.name}
                                                 className="h-full w-full object-contain transition duration-500 group-hover:scale-110"
                                             />

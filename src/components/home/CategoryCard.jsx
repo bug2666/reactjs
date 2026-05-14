@@ -1,9 +1,21 @@
 export default function CategoryCard({ title, image, count }) {
+    const getImageSrc = (imageUrl) => {
+        if (!imageUrl) {
+            return "";
+        }
+
+        if (imageUrl.startsWith("http")) {
+            return imageUrl;
+        }
+
+        return `${process.env.REACT_APP_API_URL.replace('/api', '')}${imageUrl}`;
+    };
+
     return (
         /* Thêm class 'group' ở thẻ cha để khi hover vào cha, con sẽ thay đổi */
         <div className="group relative h-80 rounded-2xl overflow-hidden cursor-pointer">
             <img
-                src={image}
+                src={getImageSrc(image)}
                 alt={title}
                 className="w-full h-full object-cover  duration-500 group-hover:scale-110"
             />

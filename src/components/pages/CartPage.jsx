@@ -12,6 +12,18 @@ export default function CartPage() {
         return Number(price).toLocaleString("vi-VN") + "đ";
     };
 
+    const getImageSrc = (imageUrl) => {
+        if (!imageUrl) {
+            return "";
+        }
+
+        if (imageUrl.startsWith("http")) {
+            return imageUrl;
+        }
+
+        return `${process.env.REACT_APP_API_URL.replace('/api', '')}${imageUrl}`;
+    };
+
     const fetchCart = async () => {
         try {
             setLoading(true);
@@ -125,7 +137,7 @@ export default function CartPage() {
                             <div className="h-28 w-28 rounded-xl bg-gray-100">
                                 {item.imageUrl && (
                                     <img
-                                        src={item.imageUrl}
+                                        src={getImageSrc(item.imageUrl)}
                                         alt={item.productName}
                                         className="h-full w-full object-contain"
                                     />

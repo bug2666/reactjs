@@ -1,4 +1,6 @@
 import ProductCard from "./ProductCard";
+import { Link } from "react-router-dom";
+
 
 export default function FeaturedProductsSection({ products, loading, errorMsg }) {
     return (
@@ -10,9 +12,12 @@ export default function FeaturedProductsSection({ products, loading, errorMsg })
                         <p className="text-gray-500 mt-2">Những mẫu thiết kế mới nhất và được yêu thích nhất mùa này.</p>
                     </div>
 
-                    <button className="text-sm font-bold uppercase border-b-2 border-black pb-1 hover:text-orange-500 hover:border-orange-500 transition-all">
+                    <a
+                        href="/ProductListPage"
+                        className="text-sm font-bold uppercase border-b-2 border-black pb-1 hover:text-orange-500 hover:border-orange-500 transition-all"
+                    >
                         Xem tất cả
-                    </button>
+                    </a>
                 </div>
 
                 {loading && (

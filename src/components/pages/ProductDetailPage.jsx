@@ -13,13 +13,28 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
+  const getImageSrc = (imageUrl) => {
+    if (!imageUrl) {
+      return "";
+    }
+
+    if (imageUrl.startsWith("http")) {
+      return imageUrl;
+    }
+
+    return `${process.env.REACT_APP_API_URL.replace('/api', '')}${imageUrl}`;
+  };
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
 
         const res = await axiosClient.get(`/products/getProductById/${id}`);
+
         const data = res.data;
+
+        console.log(data);
 
         setProduct(data);
 
@@ -190,7 +205,7 @@ export default function ProductDetailPage() {
             <div className="rounded-3xl bg-white p-6 shadow-sm">
               <div className="flex aspect-square items-center justify-center overflow-hidden rounded-2xl bg-gray-100">
                 <img
-                  src={selectedImage}
+                  src={getImageSrc(selectedImage)}
                   alt={product.name}
                   className="h-full w-full object-contain"
                 />
@@ -210,7 +225,7 @@ export default function ProductDetailPage() {
                       }`}
                   >
                     <img
-                      src={image.imageUrl}
+                      src={getImageSrc(image.imageUrl)}
                       alt={product.name}
                       className="aspect-square w-full object-contain"
                     />

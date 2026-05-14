@@ -114,9 +114,29 @@ export default function AdminProductsPage() {
         try {
             setMessage("");
 
-            await axiosClient.delete(`/products/deleteProduct/${productId}`);
+            const res = await axiosClient.delete(`/products/deleteProduct/${productId}`);
+
+            if (res.data.action === 'hidden') {
+                setProducts((currentProducts) => {
+                    return currentProducts.map((product) => {
+                        if (product.id === productId) {
+                            return {
+                                ...product,
+                                isActive: 0
+                            };
+                        }
+
+                        return product;
+                    });
+                });
+
+                setMessage(res.data.message);
+                return;
+            }
+
             setProducts((currentProducts) => currentProducts.filter((product) => product.id !== productId));
-            setMessage("Xóa sản phẩm thành công");
+            setMessage(res.data.message);
+
         } catch (error) {
             const data = error.response?.data;
 
@@ -216,8 +236,15 @@ export default function AdminProductsPage() {
             updateProductInState(res.data);
             setMessage("Xóa biến thể thành công");
         } catch (error) {
-            setMessage(error.response?.data?.message || error.message);
+            const data = error.response?.data;
+
+            if (data?.product) {
+                updateProductInState(data.product);
+            }
+
+            setMessage(data?.message || error.message);
         }
+
     };
 
     const handleSubmitImage = async (event, productId) => {
@@ -464,8 +491,14 @@ export default function AdminProductsPage() {
                                                     <div className="flex justify-end gap-2">
                                                         <button
                                                             type="button"
-                                                            onClick={() => {
-                                                                setExpandedProductId(expandedProductId === product.id ? null : product.id);
+                                                            onClick={async() => {
+                                                                if (expandedProductId === product.id) {
+                                                                    setExpandedProductId(null);
+                                                                    return;
+                                                                }
+                                                                const res = await axiosClient.get(`/products/getProductById/${product.id}`);
+                                                                updateProductInState(res.data);
+                                                                setExpandedProductId(product.id);
                                                                 resetVariantForm();
                                                                 resetImageForm();
                                                             }}
@@ -475,12 +508,15 @@ export default function AdminProductsPage() {
                                                         </button>
                                                         <button
                                                             type="button"
-                                                            onClick={() => {
-                                                                setEditingProduct(product);
+                                                            onClick={async () => {
+                                                                const res = await axiosClient.get(`/products/getProductById/${product.id}`);
+                                                                updateProductInState(res.data);
+                                                                setEditingProduct(res.data);
                                                                 setEditingProductId(editingProductId === product.id ? null : product.id);
-                                                                setExpandedProductId(null);
+                                                                setExpandedProductId(product.id);
                                                                 setShowCreateForm(false);
                                                             }}
+
                                                             className="rounded-lg border border-gray-200 px-3 py-2 font-semibold text-gray-700 hover:bg-gray-50"
                                                         >
                                                             Sửa

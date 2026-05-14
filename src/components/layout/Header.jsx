@@ -35,7 +35,14 @@ export default function Header() {
     return (
         <header className="fixed top-0 left-0 right-0 z-50 border-b border-gray-700 bg-white/90 backdrop-blur-md">
             <nav className="flex h-20 items-center justify-between px-4 md:px-8 lg:px-20">
-                <div className="text-2xl uppercase font-black">Logo</div>
+                {/* <div className="text-2xl uppercase font-black">Logo</div> */}
+                <a href="/">
+                    <img
+                        src="/logo.png"
+                        alt="Logo"
+                        className="h-10 w-auto"
+                    />
+                </a>
 
                 <div className="hidden items-center gap-9 md:flex">
 
