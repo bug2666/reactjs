@@ -13,17 +13,20 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
-  const getImageSrc = (imageUrl) => {
+  const PRODUCT_PLACEHOLDER_IMAGE = "/images/product-placeholder.png";
+
+const getImageSrc = (imageUrl) => {
     if (!imageUrl) {
-      return "";
+        return PRODUCT_PLACEHOLDER_IMAGE;
     }
 
     if (imageUrl.startsWith("http")) {
-      return imageUrl;
+        return imageUrl;
     }
 
     return `${process.env.REACT_APP_API_URL.replace('/api', '')}${imageUrl}`;
-  };
+};
+
 
   useEffect(() => {
     const fetchProduct = async () => {

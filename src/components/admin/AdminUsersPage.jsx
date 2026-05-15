@@ -1,5 +1,15 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { ShieldCheck, Trash2, Users } from "lucide-react";
 import axiosClient from "../../api/axiosClient";
+
+const getInitials = (name) => {
+    return (name || "U")
+        .split(" ")
+        .map((part) => part[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase();
+};
 
 export default function AdminUsersPage() {
     const [users, setUsers] = useState([]);
@@ -13,7 +23,7 @@ export default function AdminUsersPage() {
         totalPages: 1
     });
 
-    const fetchUsers = async () => {
+    const fetchUsers = useCallback(async () => {
         try {
             setLoading(true);
             setMessage("");
@@ -26,11 +36,11 @@ export default function AdminUsersPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [page]);
 
     useEffect(() => {
         fetchUsers();
-    }, [page]);
+    }, [fetchUsers]);
 
     const handleUpdateRole = async (userId, role) => {
         try {
@@ -75,67 +85,99 @@ export default function AdminUsersPage() {
     };
 
     return (
-        <section>
-            <h1 className="text-3xl font-bold text-gray-900">
-                Quản lý người dùng
-            </h1>
-
-            <p className="mt-2 text-gray-500">
-                Danh sách, phân quyền và xóa tài khoản.
-            </p>
+        <section className="space-y-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <p className="text-sm font-bold uppercase tracking-[0.25em] text-orange-500">
+                        Accounts
+                    </p>
+                    <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">
+                        Quản lý người dùng
+                    </h1>
+                    <p className="mt-2 text-slate-500">
+                        Danh sách tài khoản, phân quyền và thao tác quản trị.
+                    </p>
+                </div>
+                <div className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-bold text-blue-700">
+                    <Users size={18} />
+                    {pagination.totalItems} người dùng
+                </div>
+            </div>
 
             {loading && (
-                <div className="mt-6 rounded-xl bg-white p-6 text-gray-500 shadow-sm">
+                <div className="rounded-2xl border border-slate-200 bg-white p-6 text-slate-500 shadow-sm">
                     Đang tải người dùng...
                 </div>
             )}
 
             {message && (
-                <div className="mt-6 rounded-xl bg-gray-100 p-4 text-sm text-gray-700">
+                <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm font-semibold text-slate-700 shadow-sm">
                     {message}
                 </div>
             )}
 
             {!loading && (
-                <div className="mt-6 overflow-hidden rounded-xl bg-white shadow-sm">
-                    <div className="border-b border-gray-100 px-4 py-3 text-sm font-semibold text-gray-600">
-                        Hiển thị {users.length} / {pagination.totalItems} người dùng
+                <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+                    <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+                        <p className="text-sm font-bold text-slate-600">
+                            Hiển thị {users.length} / {pagination.totalItems} người dùng
+                        </p>
+                        <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                            Trang {pagination.page}
+                        </p>
                     </div>
                     <div className="overflow-x-auto">
-                        <table className="w-full min-w-[800px] text-left text-sm">
-                            <thead className="bg-gray-100 text-xs uppercase text-gray-500">
+                        <table className="w-full min-w-[860px] text-left text-sm">
+                            <thead className="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
                                 <tr>
-                                    <th className="px-4 py-3">ID</th>
-                                    <th className="px-4 py-3">Tên</th>
-                                    <th className="px-4 py-3">Email</th>
-                                    <th className="px-4 py-3">SĐT</th>
-                                    <th className="px-4 py-3">Vai trò</th>
-                                    <th className="px-4 py-3 text-right">Thao tác</th>
+                                    <th className="px-5 py-4">Người dùng</th>
+                                    <th className="px-5 py-4">Email</th>
+                                    <th className="px-5 py-4">SĐT</th>
+                                    <th className="px-5 py-4">Vai trò</th>
+                                    <th className="px-5 py-4 text-right">Thao tác</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100">
+                            <tbody className="divide-y divide-slate-100">
                                 {users.map((user) => (
-                                    <tr key={user.id}>
-                                        <td className="px-4 py-3 font-semibold">#{user.id}</td>
-                                        <td className="px-4 py-3">{user.name}</td>
-                                        <td className="px-4 py-3">{user.email}</td>
-                                        <td className="px-4 py-3">{user.phone || "-"}</td>
-                                        <td className="px-4 py-3">
-                                            <select
-                                                value={user.role}
-                                                onChange={(event) => handleUpdateRole(user.id, event.target.value)}
-                                                className="rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-black"
-                                            >
-                                                <option value="user">User</option>
-                                                <option value="admin">Admin</option>
-                                            </select>
+                                    <tr key={user.id} className="transition hover:bg-orange-50/40">
+                                        <td className="px-5 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="grid h-11 w-11 place-items-center rounded-2xl bg-slate-900 text-sm font-black text-white">
+                                                    {getInitials(user.name)}
+                                                </div>
+                                                <div>
+                                                    <p className="font-black text-slate-900">{user.name}</p>
+                                                    <p className="text-xs font-semibold text-slate-400">#{user.id}</p>
+                                                </div>
+                                            </div>
                                         </td>
-                                        <td className="px-4 py-3 text-right">
+                                        <td className="px-5 py-4 font-semibold text-slate-600">{user.email}</td>
+                                        <td className="px-5 py-4 text-slate-500">{user.phone || "-"}</td>
+                                        <td className="px-5 py-4">
+                                            <div className="flex items-center gap-2">
+                                                {user.role === "admin" && (
+                                                    <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1 text-xs font-black text-orange-700">
+                                                        <ShieldCheck size={13} />
+                                                        Admin
+                                                    </span>
+                                                )}
+                                                <select
+                                                    value={user.role}
+                                                    onChange={(event) => handleUpdateRole(user.id, event.target.value)}
+                                                    className="rounded-xl border border-slate-200 px-3 py-2 font-bold outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+                                                >
+                                                    <option value="user">User</option>
+                                                    <option value="admin">Admin</option>
+                                                </select>
+                                            </div>
+                                        </td>
+                                        <td className="px-5 py-4 text-right">
                                             <button
                                                 type="button"
                                                 onClick={() => handleDeleteUser(user.id)}
-                                                className="rounded-lg border border-red-200 px-3 py-2 font-semibold text-red-600 hover:bg-red-50"
+                                                className="inline-flex items-center gap-2 rounded-xl border border-red-200 px-3 py-2 font-bold text-red-600 transition hover:bg-red-50"
                                             >
+                                                <Trash2 size={15} />
                                                 Xóa
                                             </button>
                                         </td>
@@ -145,12 +187,12 @@ export default function AdminUsersPage() {
                         </table>
                     </div>
                     {pagination.totalPages > 1 && (
-                        <div className="flex items-center justify-center gap-2 border-t border-gray-100 p-4">
+                        <div className="flex flex-wrap items-center justify-center gap-2 border-t border-slate-100 p-4">
                             <button
                                 type="button"
                                 disabled={page === 1}
                                 onClick={() => setPage(page - 1)}
-                                className="rounded-lg border border-gray-200 px-3 py-2 font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="rounded-xl border border-slate-200 px-3 py-2 font-bold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 Trước
                             </button>
@@ -165,8 +207,8 @@ export default function AdminUsersPage() {
                                         onClick={() => setPage(pageNumber)}
                                         className={
                                             page === pageNumber
-                                                ? "rounded-lg bg-orange-500 px-3 py-2 font-bold text-white"
-                                                : "rounded-lg border border-gray-200 px-3 py-2 font-semibold text-gray-700 hover:bg-gray-50"
+                                                ? "rounded-xl bg-orange-500 px-3 py-2 font-black text-white shadow-lg shadow-orange-500/25"
+                                                : "rounded-xl border border-slate-200 px-3 py-2 font-bold text-slate-700 transition hover:bg-slate-50"
                                         }
                                     >
                                         {pageNumber}
@@ -178,7 +220,7 @@ export default function AdminUsersPage() {
                                 type="button"
                                 disabled={page === pagination.totalPages}
                                 onClick={() => setPage(page + 1)}
-                                className="rounded-lg border border-gray-200 px-3 py-2 font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="rounded-xl border border-slate-200 px-3 py-2 font-bold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 Sau
                             </button>

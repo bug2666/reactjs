@@ -1,5 +1,4 @@
 import ProductCard from "./ProductCard";
-import { Link } from "react-router-dom";
 
 
 export default function FeaturedProductsSection({ products, loading, errorMsg }) {

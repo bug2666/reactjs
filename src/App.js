@@ -62,18 +62,17 @@ function App() {
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/orders" element={<OrdersPage />} />
           </Route>
-
-          <Route element={<AdminRoute />}>
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AdminDashboardPage />} />
-              <Route path="products" element={<AdminProductsPage />} />
-              <Route path="orders" element={<AdminOrdersPage />} />
-              <Route path="users" element={<AdminUsersPage />} />
-              <Route path="categories" element={<AdminCategoriesPage />} />
-              <Route path="brands" element={<AdminBrandsPage />} />
-            </Route>
+        </Route>
+        
+        <Route element={<AdminRoute />}>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboardPage />} />
+            <Route path="products" element={<AdminProductsPage />} />
+            <Route path="orders" element={<AdminOrdersPage />} />
+            <Route path="users" element={<AdminUsersPage />} />
+            <Route path="categories" element={<AdminCategoriesPage />} />
+            <Route path="brands" element={<AdminBrandsPage />} />
           </Route>
-          
         </Route>
       </Routes>
     </BrowserRouter>

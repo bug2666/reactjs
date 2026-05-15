@@ -1,9 +1,12 @@
 import { Heart, ShoppingCart } from 'lucide-react';
 
+const PRODUCT_PLACEHOLDER_IMAGE = "/images/product-placeholder.png";
+
+
 export default function ProductCard({ name, price, category, image }) {
     const getImageSrc = (imageUrl) => {
         if (!imageUrl) {
-            return "";
+            return PRODUCT_PLACEHOLDER_IMAGE;
         }
 
         if (imageUrl.startsWith("http")) {
@@ -13,6 +16,7 @@ export default function ProductCard({ name, price, category, image }) {
         return `${process.env.REACT_APP_API_URL.replace('/api', '')}${imageUrl}`;
     };
 
+
     return (
         <div className="group bg-white rounded-2xl p-4 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
 
@@ -21,6 +25,9 @@ export default function ProductCard({ name, price, category, image }) {
                 <img
                     src={getImageSrc(image)}
                     alt={name}
+                    onError={(event) => {
+                        event.currentTarget.src = PRODUCT_PLACEHOLDER_IMAGE;
+                    }}
                     className="w-4/5 h-4/5 object-contain transition-transform duration-500 group-hover:scale-110"
                 />
 

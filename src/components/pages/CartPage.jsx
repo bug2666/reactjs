@@ -12,9 +12,11 @@ export default function CartPage() {
         return Number(price).toLocaleString("vi-VN") + "đ";
     };
 
+    const PRODUCT_PLACEHOLDER_IMAGE = "/images/product-placeholder.png";
+
     const getImageSrc = (imageUrl) => {
         if (!imageUrl) {
-            return "";
+            return PRODUCT_PLACEHOLDER_IMAGE;
         }
 
         if (imageUrl.startsWith("http")) {
@@ -24,11 +26,12 @@ export default function CartPage() {
         return `${process.env.REACT_APP_API_URL.replace('/api', '')}${imageUrl}`;
     };
 
+
     const fetchCart = async () => {
         try {
             setLoading(true);
             setMessage("");
-            
+
             const res = await axiosClient.get('/cart');
 
 
@@ -135,14 +138,16 @@ export default function CartPage() {
                             className="flex gap-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
                         >
                             <div className="h-28 w-28 rounded-xl bg-gray-100">
-                                {item.imageUrl && (
-                                    <img
-                                        src={getImageSrc(item.imageUrl)}
-                                        alt={item.productName}
-                                        className="h-full w-full object-contain"
-                                    />
-                                )}
+                                <img
+                                    src={getImageSrc(item.imageUrl)}
+                                    alt={item.productName}
+                                    onError={(event) => {
+                                        event.currentTarget.src = PRODUCT_PLACEHOLDER_IMAGE;
+                                    }}
+                                    className="h-full w-full object-contain"
+                                />
                             </div>
+
 
                             <div className="flex flex-1 flex-col">
                                 <h2 className="font-bold text-gray-900">

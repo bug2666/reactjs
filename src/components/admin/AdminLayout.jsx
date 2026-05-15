@@ -1,97 +1,79 @@
 import { NavLink, Outlet } from "react-router-dom";
+import { BarChart3, Boxes, ClipboardList, FolderTree, Gem, Home, Shield, Users } from "lucide-react";
+
+const navItems = [
+    { to: "/admin", label: "Dashboard", icon: BarChart3, end: true },
+    { to: "/admin/products", label: "Sản phẩm", icon: Boxes },
+    { to: "/admin/orders", label: "Đơn hàng", icon: ClipboardList },
+    { to: "/admin/users", label: "Người dùng", icon: Users },
+    { to: "/admin/categories", label: "Danh mục", icon: FolderTree },
+    { to: "/admin/brands", label: "Thương hiệu", icon: Gem }
+];
 
 export default function AdminLayout() {
     return (
-        <div className="min-h-screen bg-gray-100 lg:flex">
-            <aside className="border-b border-gray-200 bg-white p-4 lg:min-h-screen lg:w-64 lg:border-b-0 lg:border-r">
-                <h1 className="text-xl font-black uppercase text-gray-900">
-                    Admin
-                </h1>
-
-                <nav className="mt-6 flex flex-col gap-2">
-                    <NavLink
-                        to="/admin"
-                        end
-                        className={({ isActive }) => {
-                            if (isActive) {
-                                return "rounded-lg bg-orange-500 px-4 py-3 font-bold text-white";
-                            }
-
-                            return "rounded-lg px-4 py-3 font-bold text-gray-600 hover:bg-gray-100 hover:text-black";
-                        }}
-                    >
-                        Dashboard
-                    </NavLink>
-
-                    <NavLink
-                        to="/admin/products"
-                        className={({ isActive }) => {
-                            if (isActive) {
-                                return "rounded-lg bg-orange-500 px-4 py-3 font-bold text-white";
-                            }
-
-                            return "rounded-lg px-4 py-3 font-bold text-gray-600 hover:bg-gray-100 hover:text-black";
-                        }}
-                    >
-                        Quản lý sản phẩm
-                    </NavLink>
+        <div className="min-h-screen bg-slate-50 lg:flex">
+            <aside className="border-b border-slate-200 bg-slate-950 text-white lg:sticky lg:top-0 lg:min-h-screen lg:w-72 lg:border-b-0">
+                <div className="flex items-center justify-between gap-4 px-5 py-5 lg:block lg:px-6 lg:py-7">
+                    <div>
+                        <div className="flex items-center gap-3">
+                            <div className="grid h-11 w-11 place-items-center rounded-2xl bg-orange-500 shadow-lg shadow-orange-500/30">
+                                <Shield size={22} />
+                            </div>
+                            <div>
+                                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-orange-200">
+                                    Admin
+                                </p>
+                                <h1 className="text-xl font-black tracking-tight">
+                                    Control Panel
+                                </h1>
+                            </div>
+                        </div>
+                        <p className="mt-5 hidden rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm leading-6 text-slate-300 lg:block">
+                            Quản lý sản phẩm, đơn hàng và dữ liệu cửa hàng trong một giao diện tập trung.
+                        </p>
+                    </div>
 
                     <NavLink
-                        to="/admin/orders"
-                        className={({ isActive }) => {
-                            if (isActive) {
-                                return "rounded-lg bg-orange-500 px-4 py-3 font-bold text-white";
-                            }
-
-                            return "rounded-lg px-4 py-3 font-bold text-gray-600 hover:bg-gray-100 hover:text-black";
-                        }}
+                        to="/"
+                        className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-sm font-bold text-slate-200 transition hover:bg-white/10 lg:mt-5"
                     >
-                        Quản lý đơn hàng
+                        <Home size={16} />
+                        Store
                     </NavLink>
+                </div>
 
-                    <NavLink
-                        to="/admin/users"
-                        className={({ isActive }) => {
-                            if (isActive) {
-                                return "rounded-lg bg-orange-500 px-4 py-3 font-bold text-white";
-                            }
+                <nav className="flex gap-2 overflow-x-auto px-4 pb-4 lg:flex-col lg:overflow-visible lg:px-5 lg:pb-6">
+                    {navItems.map((item) => {
+                        const Icon = item.icon;
 
-                            return "rounded-lg px-4 py-3 font-bold text-gray-600 hover:bg-gray-100 hover:text-black";
-                        }}
-                    >
-                        Quản lý người dùng
-                    </NavLink>
+                        return (
+                            <NavLink
+                                key={item.to}
+                                to={item.to}
+                                end={item.end}
+                                className={({ isActive }) => {
+                                    const baseClass = "flex shrink-0 items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition";
 
-                    <NavLink
-                        to="/admin/categories"
-                        className={({ isActive }) => {
-                            if (isActive) {
-                                return "rounded-lg bg-orange-500 px-4 py-3 font-bold text-white";
-                            }
+                                    if (isActive) {
+                                        return `${baseClass} bg-orange-500 text-white shadow-lg shadow-orange-500/25`;
+                                    }
 
-                            return "rounded-lg px-4 py-3 font-bold text-gray-600 hover:bg-gray-100 hover:text-black";
-                        }}
-                    >
-                        Quản lý danh mục
-                    </NavLink>
-
-                    <NavLink
-                        to="/admin/brands"
-                        className={({ isActive }) => {
-                            if (isActive) {
-                                return "rounded-lg bg-orange-500 px-4 py-3 font-bold text-white";
-                            }
-
-                            return "rounded-lg px-4 py-3 font-bold text-gray-600 hover:bg-gray-100 hover:text-black";
-                        }}
-                    >
-                        Quản lý thương hiệu
-                    </NavLink>
+                                    return `${baseClass} text-slate-300 hover:bg-white/10 hover:text-white`;
+                                }}
+                            >
+                                <Icon size={18} />
+                                {item.label}
+                            </NavLink>
+                        );
+                    })}
                 </nav>
             </aside>
 
-            <main className="flex-1 p-4 lg:p-8">
-                <Outlet />
+            <main className="min-w-0 flex-1">
+                <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+                    <Outlet />
+                </div>
             </main>
         </div>
     );

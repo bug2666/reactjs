@@ -23,9 +23,11 @@ export default function ProductListPage() {
     const [selectedCategory, setSelectedCategory] = useState('');
     const [selectedBrand, setSelectedBrand] = useState('');
 
+    const PRODUCT_PLACEHOLDER_IMAGE = "/images/product-placeholder.png";
+
     const getImageSrc = (imageUrl) => {
         if (!imageUrl) {
-            return "";
+            return PRODUCT_PLACEHOLDER_IMAGE;
         }
 
         if (imageUrl.startsWith("http")) {
@@ -34,6 +36,7 @@ export default function ProductListPage() {
 
         return `${process.env.REACT_APP_API_URL.replace('/api', '')}${imageUrl}`;
     };
+
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -284,8 +287,12 @@ export default function ProductListPage() {
                                             <img
                                                 src={getImageSrc(product.imageUrl)}
                                                 alt={product.name}
+                                                onError={(event) => {
+                                                    event.currentTarget.src = PRODUCT_PLACEHOLDER_IMAGE;
+                                                }}
                                                 className="h-full w-full object-contain transition duration-500 group-hover:scale-110"
                                             />
+
                                         </Link>
 
                                         <button
