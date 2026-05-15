@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
-import { ShoppingBag, User, LogOut, Package, IdCard, Menu, X } from 'lucide-react';
-import { Link } from "react-router-dom";
+import { ShoppingBag, User, LogOut, Package, IdCard, Menu, X, Search } from 'lucide-react';
+import { Link, useNavigate } from "react-router-dom";
 import axiosClient from '../../api/axiosClient';
 
 
 export default function Header() {
     const [user, setUser] = useState(null);
     const [openUserMenu, setOpenUserMenu] = useState(false);
+    const [headerSearch, setHeaderSearch] = useState('');
+    const navigate = useNavigate();
 
     const [openMobileMenu, setOpenMobileMenu] = useState(false);
 
@@ -29,6 +31,20 @@ export default function Header() {
             setOpenUserMenu(false);
             window.location.href = '/login';
         }
+    };
+
+    const handleHeaderSearch = (event) => {
+        event.preventDefault();
+
+        const keyword = headerSearch.trim();
+
+        if (!keyword) {
+            navigate('/ProductListPage');
+            return;
+        }
+
+        navigate(`/ProductListPage?q=${encodeURIComponent(keyword)}`);
+        setOpenMobileMenu(false);
     };
 
 
@@ -58,6 +74,17 @@ export default function Header() {
                         Contact
                     </Link>
                 </div>
+
+                <form onSubmit={handleHeaderSearch} className="relative hidden w-64 lg:block">
+                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                        type="text"
+                        value={headerSearch}
+                        onChange={(event) => setHeaderSearch(event.target.value)}
+                        placeholder="Tìm sản phẩm..."
+                        className="w-full rounded-full border border-gray-200 bg-white py-2 pl-9 pr-4 text-sm font-semibold outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+                    />
+                </form>
 
                 <div className="hidden items-center gap-9 md:flex">
                     {user ? (
@@ -135,6 +162,17 @@ export default function Header() {
             {openMobileMenu && (
                 <div className="border-t border-gray-200 bg-white px-4 py-4 md:hidden">
                     <div className="flex flex-col gap-4">
+                        <form onSubmit={handleHeaderSearch} className="relative">
+                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <input
+                                type="text"
+                                value={headerSearch}
+                                onChange={(event) => setHeaderSearch(event.target.value)}
+                                placeholder="Tìm sản phẩm..."
+                                className="w-full rounded-full border border-gray-200 bg-white py-2 pl-9 pr-4 text-sm font-semibold outline-none focus:border-orange-400"
+                            />
+                        </form>
+
                         <Link
                             to="/"
                             onClick={() => setOpenMobileMenu(false)}
