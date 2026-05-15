@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Search, ShoppingCart, Heart, SlidersHorizontal, ChevronDown } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import axiosClient from '../../api/axiosClient';
 
 const PRODUCT_PLACEHOLDER_IMAGE = "/images/product-placeholder.png";
@@ -52,7 +53,9 @@ export default function ProductListPage() {
                 setProducts(data.products);
                 setPagination(data.pagination);
             } catch (error) {
-                setErrorMsg(error.response?.data?.message || error.message);
+                const message = error.response?.data?.message || error.message;
+                setErrorMsg(message);
+                toast.error(`Tải sản phẩm thất bại: ${message}`);
             } finally {
                 setLoading(false);
             }
@@ -117,6 +120,11 @@ export default function ProductListPage() {
         setSelectedBrand('');
         setSort('newest');
         setPage(1);
+        toast.success('Đã xóa bộ lọc');
+    };
+
+    const handleAddToCart = (product) => {
+        toast.success(`Đã thêm "${product.name}" vào giỏ hàng`);
     };
 
     const formatPrice = (price) => {
@@ -360,6 +368,7 @@ export default function ProductListPage() {
                                             </span>
                                             <button
                                                 type="button"
+                                                onClick={() => handleAddToCart(product)}
                                                 className="flex items-center gap-2 rounded-full bg-slate-950 px-5 py-2 text-xs font-bold text-white transition hover:bg-orange-500 active:scale-95"
                                             >
                                                 <ShoppingCart size={14} />

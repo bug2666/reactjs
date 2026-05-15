@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import axiosClient from "../../api/axiosClient";
 
 
 export default function OrdersPage() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [message, setMessage] = useState("");
 
     const formatPrice = (price) => {
         return Number(price).toLocaleString("vi-VN") + "đ";
@@ -17,13 +17,10 @@ export default function OrdersPage() {
                 const res = await axiosClient.get('/orders/my-orders');
                 const data = res.data;
 
-                if (!res.ok) {
-                    throw new Error(data.message || "Không lấy được đơn hàng");
-                }
-
                 setOrders(data);
             } catch (error) {
-                setMessage(error.response?.data?.message || error.message);
+                const message = error.response?.data?.message || error.message;
+                toast.error(`Tải đơn hàng thất bại: ${message}`);
             } finally {
                 setLoading(false);
             }
@@ -45,12 +42,6 @@ export default function OrdersPage() {
             <h1 className="text-3xl font-bold text-gray-900">
                 Đơn hàng của tôi
             </h1>
-
-            {message && (
-                <div className="mt-5 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
-                    {message}
-                </div>
-            )}
 
             <div className="mt-8 space-y-4">
                 {orders.length === 0 ? (

@@ -3,6 +3,7 @@ import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
+import toast from 'react-hot-toast';
 import axiosClient from '../../api/axiosClient';
 import { GoogleLogin } from '@react-oauth/google';
 
@@ -18,15 +19,12 @@ const loginSchema = Yup.object({
 
 export default function LoginForm() {
     const [showPassword, setShowPassword] = useState(false);
-    const [errorMsg, setErrorMsg] = useState('');
 
 
 
 
     /* e sửa lại nhận values và helpers nếu có */
     const handleSubmit = async (values, { setSubmitting }) => {
-        setErrorMsg('');
-
         try {
             const res = await axiosClient.post('/auth/login', {
                 email: values.email,
@@ -38,9 +36,11 @@ export default function LoginForm() {
             // nếu backend trả token/user:
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
+            toast.success(`Chào mừng ${data.user?.name || 'bạn'} đã quay lại!`);
             window.location.href = '/';
         } catch (error) {
-            setErrorMsg(error.response?.data?.message || error.message);
+            const message = error.response?.data?.message || error.message;
+            toast.error(message);
         } finally {
             setSubmitting(false);
         }
@@ -159,12 +159,6 @@ export default function LoginForm() {
                                 >
                                     {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
                                 </button>
-
-                                {errorMsg && (
-                                    <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
-                                        {errorMsg}
-                                    </div>
-                                )}
                             </Form>
                         )
                     }
@@ -191,13 +185,15 @@ export default function LoginForm() {
                                 localStorage.setItem('token', data.token);
                                 localStorage.setItem('user', JSON.stringify(data.user));
 
+                                toast.success('Đăng nhập Google thành công');
                                 window.location.href = '/';
                             } catch (error) {
-                                setErrorMsg(error.response?.data?.message || error.message);
+                                const message = error.response?.data?.message || error.message;
+                                toast.error(message);
                             }
                         }}
                         onError={() => {
-                            setErrorMsg('Đăng nhập Google thất bại');
+                            toast.error('Đăng nhập Google thất bại');
                         }}
                     />
 

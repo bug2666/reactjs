@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import HomePage from "./components/pages/HomePage";
@@ -41,6 +42,25 @@ function MainLayout() {
 function App() {
   return (
     <BrowserRouter>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#0f172a',
+            color: '#fff',
+            fontWeight: 600,
+            borderRadius: '12px',
+            padding: '12px 16px',
+          },
+          success: {
+            iconTheme: { primary: '#f97316', secondary: '#fff' },
+          },
+          error: {
+            style: { background: '#dc2626', color: '#fff' },
+          },
+        }}
+      />
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/" element={<HomePage />} />

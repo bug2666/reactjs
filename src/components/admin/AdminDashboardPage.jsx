@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { AlertTriangle, Boxes, ClipboardList, Clock3, DollarSign, Users } from "lucide-react";
+import toast from "react-hot-toast";
 import {
     Area,
     AreaChart,
@@ -37,18 +38,17 @@ function EmptyChart({ label }) {
 export default function AdminDashboardPage() {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [message, setMessage] = useState("");
 
     useEffect(() => {
         const fetchStats = async () => {
             try {
                 setLoading(true);
-                setMessage("");
 
                 const res = await axiosClient.get('/admin/dashboard/stats');
                 setStats(res.data);
             } catch (error) {
-                setMessage(error.response?.data?.message || error.message);
+                const message = error.response?.data?.message || error.message;
+                toast.error(`Tải thống kê thất bại: ${message}`);
             } finally {
                 setLoading(false);
             }
@@ -90,12 +90,6 @@ export default function AdminDashboardPage() {
             {loading && (
                 <div className="rounded-2xl border border-slate-200 bg-white p-6 text-slate-500 shadow-sm">
                     Đang tải thống kê...
-                </div>
-            )}
-
-            {message && (
-                <div className="rounded-2xl border border-red-100 bg-red-50 p-4 text-sm font-semibold text-red-700">
-                    {message}
                 </div>
             )}
 

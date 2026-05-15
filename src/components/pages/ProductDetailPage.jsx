@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Truck, RotateCcw, ShieldCheck, Minus, Plus } from "lucide-react";
+import toast from "react-hot-toast";
 import axiosClient from "../../api/axiosClient";
 
 const PRODUCT_PLACEHOLDER_IMAGE = "/images/product-placeholder.png";
@@ -20,7 +21,6 @@ export default function ProductDetailPage() {
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("");
   const [tab, setTab] = useState("desc");
 
   const getImageSrc = (imageUrl) => {
@@ -39,7 +39,6 @@ export default function ProductDetailPage() {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        setMessage("");
 
         const res = await axiosClient.get(`/products/getProductById/${id}`);
         const data = res.data;
@@ -61,7 +60,8 @@ export default function ProductDetailPage() {
           setSelectedVariant(data.variants[0]);
         }
       } catch (error) {
-        setMessage(error.response?.data?.message || error.message);
+        const message = error.response?.data?.message || error.message;
+        toast.error(`Tải sản phẩm thất bại: ${message}`);
       } finally {
         setLoading(false);
       }
@@ -121,10 +121,8 @@ export default function ProductDetailPage() {
   };
 
   const handleAddToCart = async () => {
-    setMessage("");
-
     if (!selectedVariant) {
-      setMessage("Vui lòng chọn size và màu");
+      toast.error("Vui lòng chọn size và màu");
       return;
     }
 
@@ -135,9 +133,10 @@ export default function ProductDetailPage() {
         quantity
       });
 
-      setMessage("Đã thêm sản phẩm vào giỏ hàng");
+      toast.success(`Đã thêm "${product.name}" vào giỏ hàng`);
     } catch (error) {
-      setMessage(error.response?.data?.message || error.message);
+      const message = error.response?.data?.message || error.message;
+      toast.error(message);
     }
   };
 
@@ -349,12 +348,6 @@ export default function ProductDetailPage() {
                   )}
                 </div>
               </div>
-
-              {message && (
-                <p className="mt-5 rounded-xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700">
-                  {message}
-                </p>
-              )}
 
               <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <button

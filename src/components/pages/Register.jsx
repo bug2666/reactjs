@@ -3,6 +3,7 @@ import { User, Mail, Phone, Lock, Eye, EyeOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
+import toast from 'react-hot-toast';
 import axiosClient from '../../api/axiosClient';
 
 
@@ -30,11 +31,8 @@ const registerSchema = Yup.object({
 export default function RegisterForm() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [errorMsg, setErrorMsg] = useState('');
 
     const handleSubmit = async (values, helpers) => {
-        setErrorMsg('');
-
         try {
 
             const res = await axiosClient.post('/auth/register', {
@@ -49,9 +47,11 @@ export default function RegisterForm() {
             localStorage.setItem('user', JSON.stringify(data.user));
             //console.log(data.token);
 
+            toast.success('Đăng ký thành công! Chào mừng bạn đến với cửa hàng');
             window.location.href = '/';
         } catch (error) {
-            setErrorMsg(error.response?.data?.message || error.message);
+            const message = error.response?.data?.message || error.message;
+            toast.error(message);
         } finally {
             helpers.setSubmitting(false);
         }
@@ -213,12 +213,6 @@ export default function RegisterForm() {
                                 >
                                     {isSubmitting ? 'Đang đăng ký...' : 'Đăng ký'}
                                 </button>
-
-                                {errorMsg && (
-                                    <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
-                                        {errorMsg}
-                                    </div>
-                                )}
                             </Form>
                         )
                     }

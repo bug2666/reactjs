@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import toast from "react-hot-toast";
 import axiosClient from "../../api/axiosClient";
 
 
@@ -18,7 +19,6 @@ const profileSchema = Yup.object({
 export default function ProfilePage() {
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [message, setMessage] = useState("");
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -28,7 +28,8 @@ export default function ProfilePage() {
 
                 setProfile(data);
             } catch (error) {
-                setMessage(error.response?.data?.message || error.message);
+                const message = error.response?.data?.message || error.message;
+                toast.error(`Tải hồ sơ thất bại: ${message}`);
             } finally {
                 setLoading(false);
             }
@@ -38,8 +39,6 @@ export default function ProfilePage() {
     }, []);
 
     const handleSubmit = async (values, helpers) => {
-        setMessage("");
-
         try {
 
             const res = await axiosClient.put('/users/updateMyProfile', {
@@ -63,9 +62,10 @@ export default function ProfilePage() {
                 })
             );
 
-            setMessage("Cập nhật thông tin thành công");
+            toast.success("Cập nhật thông tin thành công");
         } catch (error) {
-            setMessage(error.response?.data?.message || error.message);
+            const message = error.response?.data?.message || error.message;
+            toast.error(message);
         } finally {
             helpers.setSubmitting(false);
         }
@@ -84,12 +84,6 @@ export default function ProfilePage() {
             <h1 className="text-3xl font-bold text-gray-900">
                 Thông tin cá nhân
             </h1>
-
-            {message && (
-                <div className="mt-5 rounded-lg bg-gray-100 px-4 py-3 text-sm text-gray-700">
-                    {message}
-                </div>
-            )}
 
             {profile && (
                 <Formik

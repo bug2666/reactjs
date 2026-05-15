@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Trash2, Minus, Plus } from "lucide-react";
+import toast from "react-hot-toast";
 import axiosClient from "../../api/axiosClient";
 
 export default function CartPage() {
@@ -60,8 +61,11 @@ export default function CartPage() {
             const data = res.data;
 
             setCart(data);
+            toast.success('Đã cập nhật số lượng');
         } catch (error) {
-            setMessage(error.response?.data?.message || error.message);
+            const message = error.response?.data?.message || error.message;
+            setMessage(message);
+            toast.error(message);
         }
     };
 
@@ -73,8 +77,11 @@ export default function CartPage() {
             const data = res.data;
 
             setCart(data);
+            toast.success('Đã xóa sản phẩm khỏi giỏ');
         } catch (error) {
-            setMessage(error.response?.data?.message || error.message);
+            const message = error.response?.data?.message || error.message;
+            setMessage(message);
+            toast.error(message);
         }
     };
 
@@ -96,19 +103,6 @@ export default function CartPage() {
                 </Link>
             </div>
         );
-    }
-
-    /* check tb */
-
-    let messageElement;
-    if (message) {
-        messageElement = (
-            <div className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
-                {message}
-            </div>
-        );
-    } else {
-        messageElement = null;
     }
 
     /* render */
@@ -236,8 +230,6 @@ export default function CartPage() {
             <h1 className="text-3xl font-bold text-gray-900">
                 Giỏ hàng của bạn
             </h1>
-
-            {messageElement}
 
             {cartContent}
 

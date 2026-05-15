@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Mail } from "lucide-react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import toast from "react-hot-toast";
 import axiosClient from "../../api/axiosClient";
 
 
@@ -14,11 +15,9 @@ const forgotPasswordSchema = Yup.object({
 
 
 export default function ForgotPasswordPage() {
-    const [message, setMessage] = useState("");
     const [isSuccess, setIsSuccess] = useState(false);
 
     const handleSubmit = async (values, helpers) => {
-        setMessage("");
         setIsSuccess(false);
 
         try {
@@ -29,11 +28,12 @@ export default function ForgotPasswordPage() {
             const data = res.data;
 
             setIsSuccess(true);
-            setMessage(data.message);
+            toast.success(data.message || 'Đã gửi link đặt lại mật khẩu vào email');
             helpers.resetForm();
         } catch (error) {
+            const message = error.response?.data?.message || error.message;
             setIsSuccess(false);
-            setMessage(error.response?.data?.message || error.message);
+            toast.error(message);
         } finally {
             helpers.setSubmitting(false);
         }
@@ -88,15 +88,6 @@ export default function ForgotPasswordPage() {
                             >
                                 {isSubmitting ? "Đang gửi..." : "Gửi link đặt lại mật khẩu"}
                             </button>
-
-                            {message && (
-                                <div className={`rounded-lg px-3 py-2 text-sm ${isSuccess
-                                    ? "bg-green-50 text-green-700"
-                                    : "bg-red-50 text-red-600"
-                                    }`}>
-                                    {message}
-                                </div>
-                            )}
                         </Form>
                     )}
 

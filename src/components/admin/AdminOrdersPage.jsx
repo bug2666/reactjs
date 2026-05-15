@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ClipboardList, PackageCheck } from "lucide-react";
+import toast from "react-hot-toast";
 import axiosClient from '../../api/axiosClient';
 
 const orderStatuses = [
@@ -43,7 +44,9 @@ export default function AdminOrdersPage() {
 
                 setOrders(data);
             } catch (error) {
-                setMessage(error.response?.data?.message || error.message);
+                const message = error.response?.data?.message || error.message;
+                setMessage(message);
+                toast.error(`Tải đơn hàng thất bại: ${message}`);
             } finally {
                 setLoading(false);
             }
@@ -73,8 +76,11 @@ export default function AdminOrdersPage() {
             });
 
             setMessage("Cập nhật trạng thái đơn hàng thành công");
+            toast.success("Cập nhật trạng thái đơn hàng thành công");
         } catch (error) {
-            setMessage(error.response?.data?.message || error.message);
+            const message = error.response?.data?.message || error.message;
+            setMessage(message);
+            toast.error(message);
         }
     };
 
@@ -101,12 +107,6 @@ export default function AdminOrdersPage() {
             {loading && (
                 <div className="rounded-2xl border border-slate-200 bg-white p-6 text-slate-500 shadow-sm">
                     Đang tải đơn hàng...
-                </div>
-            )}
-
-            {message && (
-                <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm font-semibold text-slate-700 shadow-sm">
-                    {message}
                 </div>
             )}
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import HeroSection from "../home/HeroSection";
 import CategorySection from "../home/CategorySection";
 import FeaturedProductsSection from "../home/FeaturedProductsSection";
@@ -45,7 +46,9 @@ export default function HomePage() {
 
 
       } catch (error) {
-        setProductError(error.response?.data?.message || error.message);
+        const message = error.response?.data?.message || error.message;
+        setProductError(message);
+        toast.error(`Tải sản phẩm thất bại: ${message}`);
       } finally {
         setLoadingProducts(false);
       }

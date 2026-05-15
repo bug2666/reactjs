@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { Lock } from "lucide-react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import toast from "react-hot-toast";
 import axiosClient from "../../api/axiosClient";
 
 const resetPasswordSchema = Yup.object({
@@ -19,11 +20,9 @@ const resetPasswordSchema = Yup.object({
 export default function ResetPasswordPage() {
     const { token } = useParams();
 
-    const [message, setMessage] = useState("");
     const [success, setSuccess] = useState(false);
 
     const handleSubmit = async (values, helpers) => {
-        setMessage("");
         setSuccess(false);
 
         try {
@@ -34,11 +33,12 @@ export default function ResetPasswordPage() {
             const data = res.data;
 
             setSuccess(true);
-            setMessage(data.message);
+            toast.success(data.message || 'Đặt lại mật khẩu thành công');
             helpers.resetForm();
         } catch (error) {
-            setMessage(error.response?.data?.message || error.message);
+            const message = error.response?.data?.message || error.message;
             setSuccess(false);
+            toast.error(message);
         } finally {
             helpers.setSubmitting(false);
         }
@@ -119,15 +119,6 @@ export default function ResetPasswordPage() {
                             >
                                 {isSubmitting ? "Đang xử lý..." : "Đặt lại mật khẩu"}
                             </button>
-
-                            {message && (
-                                <div className={`rounded-lg px-3 py-2 text-sm ${success
-                                    ? "bg-green-50 text-green-700"
-                                    : "bg-red-50 text-red-600"
-                                    }`}>
-                                    {message}
-                                </div>
-                            )}
                         </Form>
                     )}
 

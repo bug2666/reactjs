@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { ShieldCheck, Trash2, Users } from "lucide-react";
+import toast from "react-hot-toast";
 import axiosClient from "../../api/axiosClient";
 
 const getInitials = (name) => {
@@ -32,7 +33,9 @@ export default function AdminUsersPage() {
             setUsers(res.data.users);
             setPagination(res.data.pagination);
         } catch (error) {
-            setMessage(error.response?.data?.message || error.message);
+            const message = error.response?.data?.message || error.message;
+            setMessage(message);
+            toast.error(message);
         } finally {
             setLoading(false);
         }
@@ -61,8 +64,11 @@ export default function AdminUsersPage() {
             });
 
             setMessage("Cập nhật vai trò thành công");
+            toast.success("Cập nhật vai trò thành công");
         } catch (error) {
-            setMessage(error.response?.data?.message || error.message);
+            const message = error.response?.data?.message || error.message;
+            setMessage(message);
+            toast.error(message);
         }
     };
 
@@ -79,8 +85,11 @@ export default function AdminUsersPage() {
             await axiosClient.delete(`/admin/users/${userId}`);
             setUsers((currentUsers) => currentUsers.filter((user) => user.id !== userId));
             setMessage("Xóa người dùng thành công");
+            toast.success("Xóa người dùng thành công");
         } catch (error) {
-            setMessage(error.response?.data?.message || error.message);
+            const message = error.response?.data?.message || error.message;
+            setMessage(message);
+            toast.error(message);
         }
     };
 
@@ -107,12 +116,6 @@ export default function AdminUsersPage() {
             {loading && (
                 <div className="rounded-2xl border border-slate-200 bg-white p-6 text-slate-500 shadow-sm">
                     Đang tải người dùng...
-                </div>
-            )}
-
-            {message && (
-                <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm font-semibold text-slate-700 shadow-sm">
-                    {message}
                 </div>
             )}
 

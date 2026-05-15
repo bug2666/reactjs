@@ -2,6 +2,7 @@ import { Fragment, useCallback, useEffect, useState } from "react";
 import { Boxes, ChevronDown, ImagePlus, Pencil, Plus, Trash2 } from "lucide-react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import toast from "react-hot-toast";
 import axiosClient from '../../api/axiosClient';
 
 const productSchema = Yup.object({
@@ -67,11 +68,13 @@ export default function AdminProductsPage() {
     const showSuccessMessage = (text) => {
         setMessageType("success");
         setMessage(text);
+        toast.success(text);
     };
 
     const showErrorMessage = (text) => {
         setMessageType("error");
         setMessage(text);
+        toast.error(text);
     };
 
     const updateProductInState = (updatedProduct) => {
@@ -432,18 +435,6 @@ export default function AdminProductsPage() {
 
             {loading && (
                 <div className="rounded-2xl border border-slate-200 bg-white p-6 text-slate-500 shadow-sm">Đang tải sản phẩm...</div>
-            )}
-
-            {message && (
-                <div
-                    className={
-                        messageType === "success"
-                            ? "rounded-2xl border border-green-200 bg-green-50 p-4 text-sm font-semibold text-green-700 shadow-sm"
-                            : "rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700 shadow-sm"
-                    }
-                >
-                    {message}
-                </div>
             )}
 
             {!loading && products.length === 0 && (

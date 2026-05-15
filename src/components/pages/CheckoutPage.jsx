@@ -1,7 +1,7 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import toast from "react-hot-toast";
 import axiosClient from "../../api/axiosClient";
 
 
@@ -21,24 +21,26 @@ const checkoutSchema = Yup.object({
 
 export default function CheckoutPage() {
     const navigate = useNavigate();
-    const [message, setMessage] = useState("");
 
     const handleSubmit = async (values, helpers) => {
-        setMessage("");
-
         try {
-
-            await axiosClient.post('/orders', {
-                shippingName: values.shippingName,
-                shippingPhone: values.shippingPhone,
-                shippingAddress: values.shippingAddress,
-                paymentMethod: values.paymentMethod
-            });
-
+            await toast.promise(
+                axiosClient.post('/orders', {
+                    shippingName: values.shippingName,
+                    shippingPhone: values.shippingPhone,
+                    shippingAddress: values.shippingAddress,
+                    paymentMethod: values.paymentMethod
+                }),
+                {
+                    loading: 'Đang đặt hàng...',
+                    success: 'Đặt hàng thành công!',
+                    error: (err) => err.response?.data?.message || err.message
+                }
+            );
 
             navigate("/orders");
         } catch (error) {
-            setMessage(error.response?.data?.message || error.message);
+            // toast.promise đã hiển thị lỗi
         } finally {
             helpers.setSubmitting(false);
         }
@@ -50,11 +52,6 @@ export default function CheckoutPage() {
                 Thanh toán
             </h1>
 
-            {message && (
-                <div className="mt-5 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
-                    {message}
-                </div>
-            )}
             <Formik
                 initialValues={{
                     shippingName: '',

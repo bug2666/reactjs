@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { FolderTree, Pencil, Plus, Trash2, X } from "lucide-react";
+import toast from "react-hot-toast";
 import axiosClient from "../../api/axiosClient";
 
 export default function AdminCategoriesPage() {
@@ -13,11 +14,13 @@ export default function AdminCategoriesPage() {
     const showSuccessMessage = (text) => {
         setMessageType("success");
         setMessage(text);
+        toast.success(text);
     };
 
     const showErrorMessage = (text) => {
         setMessageType("error");
         setMessage(text);
+        toast.error(text);
     };
 
     const fetchCategories = async () => {
@@ -155,18 +158,6 @@ export default function AdminCategoriesPage() {
             {loading && (
                 <div className="rounded-2xl border border-slate-200 bg-white p-6 text-slate-500 shadow-sm">
                     Đang tải danh mục...
-                </div>
-            )}
-
-            {message && (
-                <div
-                    className={
-                        messageType === "success"
-                            ? "rounded-2xl border border-green-200 bg-green-50 p-4 text-sm font-semibold text-green-700 shadow-sm"
-                            : "rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700 shadow-sm"
-                    }
-                >
-                    {message}
                 </div>
             )}
 
