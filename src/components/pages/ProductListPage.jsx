@@ -173,17 +173,24 @@ export default function ProductListPage() {
                         </div>
 
                         <div>
-                            <h3 className=" mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
                                 Danh mục
                             </h3>
-                            {/* render các danh mục sản phẩm để người dùng chọn */}
 
-                            <div className="flex items-center space-x-4">
-                                {categories.map((category) => { /* duyệt từng cate trong mảng */
+                            <div className="space-y-2">
+                                {categories.map((category) => {
                                     const isChecked = selectedCategory === category;
 
                                     return (
-                                        <label key={category}>
+                                        <label
+                                            key={category}
+                                            className={
+                                                isChecked
+                                                    ? "flex cursor-pointer items-center justify-between rounded-xl border border-orange-200 bg-orange-50 px-3 py-2 text-sm font-bold text-orange-700"
+                                                    : "flex cursor-pointer items-center justify-between rounded-xl border border-gray-100 px-3 py-2 text-sm font-semibold text-gray-600 transition hover:border-orange-100 hover:bg-orange-50/60 hover:text-gray-900"
+                                            }
+                                        >
+                                            <span className="truncate">{category}</span>
                                             <input
                                                 type="radio"
                                                 name="category"
@@ -191,12 +198,11 @@ export default function ProductListPage() {
                                                 onChange={() => {
                                                     setSelectedCategory(category);
                                                 }}
+                                                className="h-4 w-4 accent-orange-500"
                                             />
-                                            {category}
                                         </label>
                                     );
                                 })}
-
                             </div>
                         </div>
 
