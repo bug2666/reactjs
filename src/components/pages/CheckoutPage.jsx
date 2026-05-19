@@ -19,7 +19,6 @@ const checkoutSchema = Yup.object({
 
 
 export default function CheckoutPage() {
-    const navigate = useNavigate();
 
     const handleSubmit = async (values, helpers) => {
         try {
