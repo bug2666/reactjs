@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ShoppingBag, User, LogOut, Package, IdCard, Menu, X, Search } from 'lucide-react';
 import { Link, useNavigate } from "react-router-dom";
 import axiosClient from '../../api/axiosClient';
+import { useCart } from '../../contexts/CartContext';
 
 
 export default function Header() {
@@ -9,6 +10,7 @@ export default function Header() {
     const [openUserMenu, setOpenUserMenu] = useState(false);
     const [headerSearch, setHeaderSearch] = useState('');
     const navigate = useNavigate();
+    const { cartCount } = useCart();
 
     const [openMobileMenu, setOpenMobileMenu] = useState(false);
 
@@ -89,8 +91,13 @@ export default function Header() {
                 <div className="hidden items-center gap-9 md:flex">
                     {user ? (
                         <>
-                            <Link to="/cart" className="hover:text-orange-500">
+                            <Link to="/cart" className="relative hover:text-orange-500">
                                 <ShoppingBag size={20} />
+                                {cartCount > 0 && (
+                                    <span className="absolute -top-2 -right-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-orange-500 px-1 text-[10px] font-bold text-white">
+                                        {cartCount > 99 ? '99+' : cartCount}
+                                    </span>
+                                )}
                             </Link>
                             <div className="relative">
                                 <button
@@ -204,7 +211,7 @@ export default function Header() {
                                     onClick={() => setOpenMobileMenu(false)}
                                     className="font-bold text-gray-600 hover:text-black"
                                 >
-                                    Giỏ hàng
+                                    Giỏ hàng {cartCount > 0 && `(${cartCount})`}
                                 </Link>
 
                                 <Link

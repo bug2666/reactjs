@@ -1,56 +1,72 @@
-import { Heart, ShoppingCart } from 'lucide-react';
+import { Link } from "react-router-dom";
 
 const PRODUCT_PLACEHOLDER_IMAGE = "/images/product-placeholder.png";
 
+const formatVnd = (price) => {
+    return Number(price || 0).toLocaleString("vi-VN") + "đ";
+};
 
-export default function ProductCard({ name, price, category, image }) {
-    const getImageSrc = (imageUrl) => {
-        if (!imageUrl) {
-            return PRODUCT_PLACEHOLDER_IMAGE;
-        }
+const getImageSrc = (imageUrl) => {
+    if (!imageUrl) {
+        return PRODUCT_PLACEHOLDER_IMAGE;
+    }
 
-        if (imageUrl.startsWith("http")) {
-            return imageUrl;
-        }
+    if (imageUrl.startsWith("http")) {
+        return imageUrl;
+    }
 
-        return `${process.env.REACT_APP_API_URL.replace('/api', '')}${imageUrl}`;
-    };
+    return `${process.env.REACT_APP_API_URL.replace('/api', '')}${imageUrl}`;
+};
 
-
+export default function ProductCard({ product }) {
     return (
-        <div className="group bg-white rounded-2xl p-4 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+        <article className="group cursor-pointer rounded-2xl border border-slate-200 p-4">
+            <Link
+                to={`/products/${product.id}`}
+                className="relative mb-6 block overflow-hidden rounded-2xl bg-slate-50"
+            >
+                <div className="grid aspect-square w-full place-items-center bg-slate-100 p-8 transition-transform duration-700 group-hover:scale-105">
+                    <img
+                        src={getImageSrc(product.imageUrl)}
+                        alt={product.name}
+                        onError={(event) => {
+                            event.currentTarget.onerror = null;
+                            event.currentTarget.src = PRODUCT_PLACEHOLDER_IMAGE;
+                        }}
+                        className="h-full w-full object-contain"
+                    />
+                </div>
 
-            {/* 1. Khung ảnh sản phẩm */}
-            <div className="relative aspect-square bg-gray-100 rounded-xl overflow-hidden mb-4 flex items-center justify-center">
-                <img
-                    src={getImageSrc(image)}
-                    alt={name}
-                    onError={(event) => {
-                        event.currentTarget.src = PRODUCT_PLACEHOLDER_IMAGE;
-                    }}
-                    className="w-4/5 h-4/5 object-contain transition-transform duration-500 group-hover:scale-110"
-                />
+                <span
+                    className="absolute left-4 top-4 bg-orange-500 px-3 py-1 text-[10px] font-black uppercase tracking-tight text-white"
+                >
+                    Mới
+                </span>
+            </Link>
 
-                {/* Nút yêu thích (Heart) */}
-                <button className="absolute top-3 right-3 p-2 bg-white rounded-full text-gray-400 hover:text-red-500 shadow-sm transition-colors">
-                    <Heart size={18} />
-                </button>
-            </div>
+            <div className="flex flex-col gap-1">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500">
+                    {product.brandName}
+                </span>
+                <Link
+                    to={`/products/${product.id}`}
+                    className="text-lg font-bold text-slate-900 transition hover:text-orange-500"
+                >
+                    {product.name}
+                </Link>
+                <p className="line-clamp-1 text-sm text-slate-500">
+                    {product.description}
+                </p>
+                <p className="text-xs text-slate-400">
+                    {product.categoryName}
+                </p>
 
-            {/* 2. Thông tin sản phẩm */}
-            <div className="space-y-1">
-                <span className="text-[10px] font-bold text-orange-500 uppercase tracking-widest">{category}</span>
-                <h3 className="font-bold text-gray-900 truncate">{name}</h3>
-
-                <div className="flex items-center justify-between pt-2">
-                    <span className="font-black text-lg">{price}đ</span>
-
-                    {/* Nút thêm vào giỏ hàng nhanh */}
-                    <button className="p-2 bg-black text-white rounded-lg hover:bg-orange-500 transition-colors">
-                        <ShoppingCart size={18} />
-                    </button>
+                <div className="mt-4 flex items-end justify-between">
+                    <span className="text-xl font-black">
+                        {formatVnd(product.basePrice)}
+                    </span>
                 </div>
             </div>
-        </div>
+        </article>
     );
 }

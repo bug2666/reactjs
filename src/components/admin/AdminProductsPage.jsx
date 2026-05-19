@@ -37,9 +37,7 @@ export default function AdminProductsPage() {
     const [page, setPage] = useState(1);
     const [editingProductId, setEditingProductId] = useState(null);
 
-
     const [uploadFile, setUploadFile] = useState(null);
-    const [uploadSortOrder, setUploadSortOrder] = useState("0");
 
 
     const PRODUCT_PLACEHOLDER_IMAGE = "/images/product-placeholder.png";
@@ -198,7 +196,7 @@ export default function AdminProductsPage() {
         }
     };
 
-    const resetVariantForm = () => {
+    const resetVariantValues = () => {
         setEditingVariant(null);
         setVariantValues(variantInitialValues);
     };
@@ -221,7 +219,7 @@ export default function AdminProductsPage() {
                 : await axiosClient.post(`/products/${productId}/variants`, payload);
 
             updateProductInState(res.data);
-            resetVariantForm();
+            resetVariantValues();
             showSuccessMessage(editingVariant ? "Cập nhật biến thể thành công" : "Thêm biến thể thành công");
         } catch (error) {
             showErrorMessage(error.response?.data?.message || error.message);
@@ -264,15 +262,22 @@ export default function AdminProductsPage() {
         try {
             setMessage("");
 
+            const product = products.find((item) => item.id === productId);
+            const existingImages = product?.images || [];
+            const maxSortOrder = existingImages.reduce(
+                (max, image) => Math.max(max, Number(image.sortOrder) || 0),
+                -1
+            );
+            const nextSortOrder = maxSortOrder + 1;
+
             const formData = new FormData();
-            formData.append("sortOrder", String(Number(uploadSortOrder || 0)));
+            formData.append("sortOrder", String(nextSortOrder));
             formData.append("image", uploadFile);
 
             const res = await axiosClient.post(`/products/${productId}/images/upload`, formData);
 
             updateProductInState(res.data);
             setUploadFile(null);
-            setUploadSortOrder("0");
             showSuccessMessage("Upload ảnh thành công");
         } catch (error) {
             showErrorMessage(error.response?.data?.message || error.message);
@@ -508,7 +513,7 @@ export default function AdminProductsPage() {
                                                                 const res = await axiosClient.get(`/products/getProductById/${product.id}`);
                                                                 updateProductInState(res.data);
                                                                 setExpandedProductId(product.id);
-                                                                resetVariantForm();
+                                                                resetVariantValues();
                                                             }}
                                                             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 font-bold text-slate-700 transition hover:bg-slate-50"
                                                         >
@@ -529,7 +534,7 @@ export default function AdminProductsPage() {
                                                                 setEditingProduct(res.data);
                                                                 setEditingProductId(product.id);
                                                                 setExpandedProductId(null);
-                                                                resetVariantForm();
+                                                                resetVariantValues();
                                                                 setShowCreateForm(false);
                                                             }}
 
@@ -659,18 +664,69 @@ export default function AdminProductsPage() {
                                                         <div className="grid gap-6 lg:grid-cols-2">
                                                             <div>
                                                                 <h3 className="text-lg font-black text-slate-900">Biến thể</h3>
-                                                                <form onSubmit={(event) => handleSubmitVariant(event, product.id)} className="mt-4 grid grid-cols-2 gap-3">
-                                                                    <input value={variantValues.size} onChange={(event) => setVariantValues({ ...variantValues, size: event.target.value })} placeholder="Size" className="rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-black" />
-                                                                    <input value={variantValues.color} onChange={(event) => setVariantValues({ ...variantValues, color: event.target.value })} placeholder="Màu" className="rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-black" />
-                                                                    <input value={variantValues.stock} onChange={(event) => setVariantValues({ ...variantValues, stock: event.target.value })} placeholder="Tồn kho" className="rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-black" />
-                                                                    <input value={variantValues.price} onChange={(event) => setVariantValues({ ...variantValues, price: event.target.value })} placeholder="Giá" className="rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-black" />
-                                                                    <input value={variantValues.sku} onChange={(event) => setVariantValues({ ...variantValues, sku: event.target.value })} placeholder="SKU" className="col-span-2 rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-black" />
-                                                                    <button type="submit" className="rounded-lg bg-orange-500 px-4 py-2 font-bold text-white hover:bg-orange-600">
-                                                                        {editingVariant ? "Cập nhật biến thể" : "Thêm biến thể"}
-                                                                    </button>
-                                                                    {editingVariant && (
-                                                                        <button type="button" onClick={resetVariantForm} className="rounded-lg border border-gray-200 px-4 py-2 font-bold text-gray-700 hover:bg-gray-50">Hủy</button>
-                                                                    )}
+                                                                <form onSubmit={(event) => handleSubmitVariant(event, product.id)} className="mt-4 space-y-3">
+                                                                    <div className="grid grid-cols-2 gap-4">
+                                                                        <label className="space-y-1">
+                                                                            <span className="text-sm font-semibold text-gray-600">Size</span>
+                                                                            <input
+                                                                                value={variantValues.size}
+                                                                                onChange={(event) => setVariantValues({ ...variantValues, size: event.target.value })}
+                                                                                placeholder="Size"
+                                                                                className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                                                            />
+                                                                        </label>
+
+                                                                        <label className="space-y-1">
+                                                                            <span className="text-sm font-semibold text-gray-600">Màu</span>
+                                                                            <input
+                                                                                value={variantValues.color}
+                                                                                onChange={(event) => setVariantValues({ ...variantValues, color: event.target.value })}
+                                                                                placeholder="Màu"
+                                                                                className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                                                            />
+                                                                        </label>
+
+                                                                        <label className="space-y-1">
+                                                                            <span className="text-sm font-semibold text-gray-600">Tồn kho</span>
+                                                                            <input
+                                                                                type="number"
+                                                                                value={variantValues.stock}
+                                                                                onChange={(event) => setVariantValues({ ...variantValues, stock: event.target.value })}
+                                                                                placeholder="Tồn kho"
+                                                                                className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                                                            />
+                                                                        </label>
+
+                                                                        <label className="space-y-1">
+                                                                            <span className="text-sm font-semibold text-gray-600">Giá</span>
+                                                                            <input
+                                                                                type="number"
+                                                                                value={variantValues.price}
+                                                                                onChange={(event) => setVariantValues({ ...variantValues, price: event.target.value })}
+                                                                                placeholder="Giá"
+                                                                                className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                                                            />
+                                                                        </label>
+
+                                                                        <label className="col-span-2 space-y-1">
+                                                                            <span className="text-sm font-semibold text-gray-600">SKU</span>
+                                                                            <input
+                                                                                value={variantValues.sku}
+                                                                                onChange={(event) => setVariantValues({ ...variantValues, sku: event.target.value })}
+                                                                                placeholder="SKU"
+                                                                                className="w-full rounded-lg border border-gray-300 px-3 py-2"
+                                                                            />
+                                                                        </label>
+                                                                    </div>
+
+                                                                    <div className="grid grid-cols-2 gap-4">
+                                                                        <button type="submit" className="rounded-lg bg-orange-500 px-4 py-2 font-bold text-white hover:bg-orange-600">
+                                                                            {editingVariant ? "Cập nhật biến thể" : "Thêm biến thể"}
+                                                                        </button>
+                                                                        {editingVariant && (
+                                                                            <button type="button" onClick={resetVariantValues} className="rounded-lg border border-gray-200 px-4 py-2 font-bold text-gray-700 hover:bg-gray-50">Hủy</button>
+                                                                        )}
+                                                                    </div>
                                                                 </form>
 
                                                                 <div className="mt-4 space-y-2">
@@ -700,23 +756,13 @@ export default function AdminProductsPage() {
 
                                                             <div>
                                                                 <h3 className="flex items-center gap-2 text-lg font-black text-slate-900"><ImagePlus size={20} />Ảnh sản phẩm</h3>
-                                                                <form onSubmit={(event) => handleUploadImage(event, product.id)} className="mt-4 grid grid-cols-3 gap-3">
+                                                                <form onSubmit={(event) => handleUploadImage(event, product.id)} className="mt-4 grid grid-cols-4 gap-3">
                                                                     <input
                                                                         type="file"
                                                                         accept="image/png,image/jpeg,image/webp"
                                                                         onChange={(event) => setUploadFile(event.target.files[0])}
                                                                         className="col-span-2 rounded-lg border border-gray-300 px-3 py-2"
                                                                     />
-
-                                                                    <input
-                                                                        type="number"
-                                                                        min="0"
-                                                                        value={uploadSortOrder}
-                                                                        onChange={(event) => setUploadSortOrder(event.target.value)}
-                                                                        placeholder="Thứ tự"
-                                                                        className="rounded-lg border border-gray-300 px-3 py-2"
-                                                                    />
-
                                                                     <button
                                                                         type="submit"
                                                                         className="rounded-lg bg-black px-4 py-2 font-bold text-white hover:bg-gray-800"

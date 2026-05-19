@@ -1,12 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Trash2, Minus, Plus } from "lucide-react";
 import toast from "react-hot-toast";
-import axiosClient from "../../api/axiosClient";
+import { useCart } from "../../contexts/CartContext";
 
 export default function CartPage() {
-    const [cart, setCart] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const { cart, loading, updateQuantity: updateQuantityCtx, deleteItem: deleteItemCtx } = useCart();
     const [message, setMessage] = useState("");
 
     const formatPrice = (price) => {
@@ -27,40 +26,11 @@ export default function CartPage() {
         return `${process.env.REACT_APP_API_URL.replace('/api', '')}${imageUrl}`;
     };
 
-
-    const fetchCart = async () => {
-        try {
-            setLoading(true);
-            setMessage("");
-
-            const res = await axiosClient.get('/cart');
-
-
-            const data = res.data;
-
-            setCart(data);
-        } catch (error) {
-            setMessage(error.response?.data?.message || error.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchCart();
-    }, []);
-
     const updateQuantity = async (variantId, quantity) => {
         if (quantity <= 0) return;
 
         try {
-            const res = await axiosClient.put(`/cart/items/${variantId}`, {
-                quantity
-            });
-
-            const data = res.data;
-
-            setCart(data);
+            await updateQuantityCtx(variantId, quantity);
             toast.success('Đã cập nhật số lượng');
         } catch (error) {
             const message = error.response?.data?.message || error.message;
@@ -71,12 +41,7 @@ export default function CartPage() {
 
     const deleteItem = async (variantId) => {
         try {
-            const res = await axiosClient.delete(`/cart/items/${variantId}`);
-
-
-            const data = res.data;
-
-            setCart(data);
+            await deleteItemCtx(variantId);
             toast.success('Đã xóa sản phẩm khỏi giỏ');
         } catch (error) {
             const message = error.response?.data?.message || error.message;

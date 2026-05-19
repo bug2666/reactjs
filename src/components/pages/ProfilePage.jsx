@@ -42,9 +42,8 @@ export default function ProfilePage() {
         try {
 
             const res = await axiosClient.put('/users/updateMyProfile', {
-                fullName: values.fullName,
-                phone: values.phone,
-                address: values.address
+                name: values.name,
+                phone: values.phone
             });
 
             const data = res.data;

@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { Truck, RotateCcw, ShieldCheck, Minus, Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import axiosClient from "../../api/axiosClient";
+import { useCart } from "../../contexts/CartContext";
 
 const PRODUCT_PLACEHOLDER_IMAGE = "/images/product-placeholder.png";
 
@@ -15,6 +16,7 @@ const HIGHLIGHTS = [
 
 export default function ProductDetailPage() {
   const { id } = useParams();
+  const { addToCart } = useCart();
 
   const [product, setProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState("");
@@ -127,7 +129,7 @@ export default function ProductDetailPage() {
     }
 
     try {
-      await axiosClient.post('/cart/items', {
+      await addToCart({
         productId: product.id,
         variantId: selectedVariant.id,
         quantity

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Search, ShoppingCart, Heart, SlidersHorizontal, ChevronDown } from 'lucide-react';
+import { Search, Heart, SlidersHorizontal, ChevronDown } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import axiosClient from '../../api/axiosClient';
@@ -8,8 +8,9 @@ const PRODUCT_PLACEHOLDER_IMAGE = "/images/product-placeholder.png";
 
 export default function ProductListPage() {
     const [searchParams] = useSearchParams();
+
+    // Dữ liệu sản phẩm và phân trang lấy từ backend
     const [products, setProducts] = useState([]);
-    const [page, setPage] = useState(1);
     const [pagination, setPagination] = useState({
         page: 1,
         limit: 12,
@@ -18,10 +19,22 @@ export default function ProductListPage() {
     });
     const [loading, setLoading] = useState(true);
     const [errorMsg, setErrorMsg] = useState('');
-    const [searchText, setSearchText] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('');
-    const [selectedBrand, setSelectedBrand] = useState('');
+
+    // Danh sách category/brand fetch từ API riêng (không phụ thuộc trang hiện tại)
+    const [categories, setCategories] = useState([]);
+    const [brands, setBrands] = useState([]);
+
+    // State filter (gửi lên backend)
+    // Đọc giá trị ban đầu từ URL ngay khi mount để tránh race condition
+    // (nếu để '' rồi set qua useEffect thì lần fetch đầu tiên sẽ thiếu filter)
+    const [page, setPage] = useState(1);
+    const [searchText, setSearchText] = useState(() => searchParams.get('q') || '');
+    const [debouncedSearch, setDebouncedSearch] = useState(() => searchParams.get('q') || '');
+    const [selectedCategoryId, setSelectedCategoryId] = useState(() => searchParams.get('categoryId') || '');
+    const [selectedBrandId, setSelectedBrandId] = useState(() => searchParams.get('brandId') || '');
     const [sort, setSort] = useState('newest');
+
+    // UI toggle
     const [showCategories, setShowCategories] = useState(true);
     const [showBrands, setShowBrands] = useState(true);
 
@@ -37,17 +50,65 @@ export default function ProductListPage() {
         return `${process.env.REACT_APP_API_URL.replace('/api', '')}${imageUrl}`;
     };
 
+    // Khi URL có ?q=... hoặc ?categoryId=... (từ thanh tìm kiếm Header / link trên HomePage)
     useEffect(() => {
-        setSearchText(searchParams.get('q') || '');
+        const keyword = searchParams.get('q') || '';
+        setSearchText(keyword);
+        setDebouncedSearch(keyword);
+
+        const categoryIdFromUrl = searchParams.get('categoryId') || '';
+        setSelectedCategoryId(categoryIdFromUrl);
+
+        const brandIdFromUrl = searchParams.get('brandId') || '';
+        setSelectedBrandId(brandIdFromUrl);
+
+        setPage(1);
     }, [searchParams]);
 
+    // Debounce searchText 400ms để tránh gọi API mỗi keystroke
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchText);
+            setPage(1);
+        }, 400);
+
+        return () => clearTimeout(timer);
+    }, [searchText]);
+
+    // Fetch danh sách category và brand 1 lần khi mount
+    useEffect(() => {
+        const fetchFilters = async () => {
+            try {
+                const [categoryRes, brandRes] = await Promise.all([
+                    axiosClient.get('/products/categories'),
+                    axiosClient.get('/products/brands')
+                ]);
+                setCategories(categoryRes.data);
+                setBrands(brandRes.data);
+            } catch (error) {
+                console.error('Lỗi tải bộ lọc:', error);
+            }
+        };
+
+        fetchFilters();
+    }, []);
+
+    // Fetch sản phẩm khi bất kỳ filter/page nào thay đổi
     useEffect(() => {
         const fetchProducts = async () => {
             try {
                 setLoading(true);
                 setErrorMsg('');
 
-                const res = await axiosClient.get(`/products/getProducts?page=${page}&limit=12`);
+                const params = new URLSearchParams();
+                params.set('page', page);
+                params.set('limit', 12);
+                if (debouncedSearch) params.set('search', debouncedSearch);
+                if (selectedCategoryId) params.set('categoryId', selectedCategoryId);
+                if (selectedBrandId) params.set('brandId', selectedBrandId);
+                if (sort) params.set('sort', sort);
+
+                const res = await axiosClient.get(`/products/getProducts?${params.toString()}`);
                 const data = res.data;
 
                 setProducts(data.products);
@@ -62,69 +123,16 @@ export default function ProductListPage() {
         };
 
         fetchProducts();
-    }, [page]);
-
-    const categories = [];
-    products.forEach((product) => {
-        if (product.categoryName && !categories.includes(product.categoryName)) {
-            categories.push(product.categoryName);
-        }
-    });
-
-    const brands = [];
-    products.forEach((product) => {
-        if (product.brandName && !brands.includes(product.brandName)) {
-            brands.push(product.brandName);
-        }
-    });
-
-    const categoryCounts = {
-        'Tất cả': products.length
-    };
-
-    products.forEach((product) => {
-        const categoryName = product.categoryName || 'Khác';
-        categoryCounts[categoryName] = (categoryCounts[categoryName] || 0) + 1;
-    });
-
-    const visibleCategories = ['Tất cả', ...categories];
-
-    const filteredProducts = products
-        .filter((product) => {
-            const keyword = searchText.trim().toLowerCase();
-            const searchableText = `${product.name || ''} ${product.brandName || ''} ${product.description || ''}`.toLowerCase();
-
-            const isVisibleProduct = product.isActive === 1;
-            const matchSearch = !keyword || searchableText.includes(keyword);
-            const matchCategory = !selectedCategory || product.categoryName === selectedCategory;
-            const matchBrand = !selectedBrand || product.brandName === selectedBrand;
-
-            return isVisibleProduct && matchSearch && matchCategory && matchBrand;
-        })
-
-        .sort((firstProduct, secondProduct) => {
-            if (sort === 'price-asc') {
-                return Number(firstProduct.basePrice || 0) - Number(secondProduct.basePrice || 0);
-            }
-
-            if (sort === 'price-desc') {
-                return Number(secondProduct.basePrice || 0) - Number(firstProduct.basePrice || 0);
-            }
-
-            return Number(secondProduct.id || 0) - Number(firstProduct.id || 0);
-        });
+    }, [page, debouncedSearch, selectedCategoryId, selectedBrandId, sort]);
 
     const clearFilters = () => {
         setSearchText('');
-        setSelectedCategory('');
-        setSelectedBrand('');
+        setDebouncedSearch('');
+        setSelectedCategoryId('');
+        setSelectedBrandId('');
         setSort('newest');
         setPage(1);
         toast.success('Đã xóa bộ lọc');
-    };
-
-    const handleAddToCart = (product) => {
-        toast.success(`Đã thêm "${product.name}" vào giỏ hàng`);
     };
 
     const formatPrice = (price) => {
@@ -152,11 +160,14 @@ export default function ProductListPage() {
 
                     <div className="flex flex-col gap-3 text-sm font-bold sm:flex-row sm:items-center">
                         <span className="text-slate-400">
-                            Hiển thị {filteredProducts.length} / {pagination.totalItems} sản phẩm
+                            Hiển thị {products.length} / {pagination.totalItems} sản phẩm
                         </span>
                         <select
                             value={sort}
-                            onChange={(event) => setSort(event.target.value)}
+                            onChange={(event) => {
+                                setSort(event.target.value);
+                                setPage(1);
+                            }}
                             className="rounded-lg border border-slate-200 bg-white px-4 py-2 outline-none transition focus:border-slate-900"
                         >
                             <option value="newest">Mới nhất</option>
@@ -196,10 +207,7 @@ export default function ProductListPage() {
                                 type="text"
                                 placeholder="Tìm sản phẩm..."
                                 value={searchText}
-                                onChange={(event) => {
-                                    setSearchText(event.target.value);
-                                    setPage(1);
-                                }}
+                                onChange={(event) => setSearchText(event.target.value)}
                                 className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm outline-none transition focus:border-slate-900"
                             />
                         </div>
@@ -220,17 +228,30 @@ export default function ProductListPage() {
 
                         {showCategories && (
                             <div className="max-h-72 space-y-3 overflow-y-auto pr-1">
-                                {visibleCategories.map((category) => {
-                                    const isActive = category === 'Tất cả'
-                                        ? selectedCategory === ''
-                                        : selectedCategory === category;
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setSelectedCategoryId('');
+                                        setPage(1);
+                                    }}
+                                    className={
+                                        selectedCategoryId === ''
+                                            ? "flex w-full items-center justify-between rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-bold text-white"
+                                            : "flex w-full items-center justify-between rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                                    }
+                                >
+                                    <span className="truncate">Tất cả</span>
+                                </button>
+
+                                {categories.map((category) => {
+                                    const isActive = String(selectedCategoryId) === String(category.id);
 
                                     return (
                                         <button
-                                            key={category}
+                                            key={category.id}
                                             type="button"
                                             onClick={() => {
-                                                setSelectedCategory(category === 'Tất cả' ? '' : category);
+                                                setSelectedCategoryId(category.id);
                                                 setPage(1);
                                             }}
                                             className={
@@ -239,10 +260,7 @@ export default function ProductListPage() {
                                                     : "flex w-full items-center justify-between rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
                                             }
                                         >
-                                            <span className="truncate">{category}</span>
-                                            <span className={isActive ? "text-white/70" : "text-slate-400"}>
-                                                {categoryCounts[category] || 0}
-                                            </span>
+                                            <span className="truncate">{category.name}</span>
                                         </button>
                                     );
                                 })}
@@ -265,12 +283,28 @@ export default function ProductListPage() {
 
                         {showBrands && (
                             <div className="max-h-72 space-y-3 overflow-y-auto pr-1">
+                                <label
+                                    className="flex cursor-pointer items-center gap-3 text-sm font-medium text-slate-700"
+                                >
+                                    <input
+                                        type="radio"
+                                        name="brand"
+                                        checked={selectedBrandId === ''}
+                                        onChange={() => {
+                                            setSelectedBrandId('');
+                                            setPage(1);
+                                        }}
+                                        className="h-4 w-4 accent-orange-500"
+                                    />
+                                    <span className="truncate">Tất cả</span>
+                                </label>
+
                                 {brands.map((brand) => {
-                                    const isChecked = selectedBrand === brand;
+                                    const isChecked = String(selectedBrandId) === String(brand.id);
 
                                     return (
                                         <label
-                                            key={brand}
+                                            key={brand.id}
                                             className="flex cursor-pointer items-center gap-3 text-sm font-medium text-slate-700"
                                         >
                                             <input
@@ -278,12 +312,12 @@ export default function ProductListPage() {
                                                 name="brand"
                                                 checked={isChecked}
                                                 onChange={() => {
-                                                    setSelectedBrand(brand);
+                                                    setSelectedBrandId(brand.id);
                                                     setPage(1);
                                                 }}
                                                 className="h-4 w-4 accent-orange-500"
                                             />
-                                            <span className="truncate">{brand}</span>
+                                            <span className="truncate">{brand.name}</span>
                                         </label>
                                     );
                                 })}
@@ -305,19 +339,19 @@ export default function ProductListPage() {
                         </div>
                     )}
 
-                    {!loading && !errorMsg && filteredProducts.length === 0 && (
+                    {!loading && !errorMsg && products.length === 0 && (
                         <div className="rounded-2xl border border-dashed border-slate-200 py-20 text-center">
                             <p className="font-bold text-slate-900">Không có sản phẩm phù hợp</p>
                             <p className="mt-2 text-sm text-slate-500">Thử bỏ bớt bộ lọc hoặc từ khóa khác.</p>
                         </div>
                     )}
 
-                    {!loading && !errorMsg && filteredProducts.length > 0 && (
+                    {!loading && !errorMsg && products.length > 0 && (
                         <div className="grid grid-cols-1 gap-x-6 gap-y-10 md:grid-cols-2 xl:grid-cols-3">
-                            {filteredProducts.map((product) => (
+                            {products.map((product) => (
                                 <article key={product.id} className="group cursor-pointer rounded-3xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:border-orange-200 hover:shadow-xl">
                                     <div className="relative mb-6 overflow-hidden rounded-2xl bg-slate-100">
-                                        <Link to={`/products/${product.id}`} className="grid aspect-square w-full place-items-center p-8">
+                                        <Link to={`/products/${product.id}`} className="grid h-80 w-full place-items-center p-8">
                                             <img
                                                 src={getImageSrc(product.imageUrl)}
                                                 alt={product.name}
@@ -366,14 +400,12 @@ export default function ProductListPage() {
                                             <span className="text-xl font-black text-slate-950">
                                                 {formatPrice(product.basePrice)}
                                             </span>
-                                            <button
-                                                type="button"
-                                                onClick={() => handleAddToCart(product)}
-                                                className="flex items-center gap-2 rounded-full bg-slate-950 px-5 py-2 text-xs font-bold text-white transition hover:bg-orange-500 active:scale-95"
+                                            <Link
+                                                to={`/products/${product.id}`}
+                                                className="rounded-full bg-slate-950 px-5 py-2 text-xs font-bold text-white transition hover:bg-orange-500 active:scale-95"
                                             >
-                                                <ShoppingCart size={14} />
-                                                Thêm
-                                            </button>
+                                                Chi tiết
+                                            </Link>
                                         </div>
                                     </div>
                                 </article>
