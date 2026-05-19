@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import HomePage from "./components/pages/HomePage";
@@ -28,6 +29,11 @@ import AdminCategoriesPage from "./components/admin/AdminCategoriesPage";
 import AdminBrandsPage from "./components/admin/AdminBrandsPage";
 import { CartProvider } from "./contexts/CartContext";
 
+/* queryClient là bộ nhớ/cache trung tâm của TanStack Query */
+
+const queryClient = new QueryClient();
+
+
 function MainLayout() {
   return (
     <>
@@ -42,63 +48,68 @@ function MainLayout() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <CartProvider>
-        <Toaster
-          position="top-right py-10"
-          toastOptions={{
-            duration: 1000,
-            style: {
-              background: '#0f172a',
-              color: '#fff',
-              fontWeight: 600,
-              borderRadius: '12px',
-              padding: '12px 16px',
-            },
-            success: {
-              iconTheme: { primary: '#f97316', secondary: '#fff' },
-            },
-            error: {
-              style: { background: '#dc2626', color: '#fff' },
-            },
-          }}
-        />
-        <Routes>
-          <Route element={<MainLayout />}>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/ProductListPage" element={<ProductListPage />} />
-            <Route path="/products/:id" element={<ProductDetailPage />} />
-            <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
-            <Route path="*" element={<NotFoundPage />} />
+    <QueryClientProvider client={queryClient}>
 
 
-            <Route element={<PublicRoute />}>
-              <Route path="/login" element={<LoginForm />} />
-              <Route path="/register" element={<RegisterForm />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <BrowserRouter>
+        <CartProvider>
+          <Toaster
+            position="bottom-right"
+            toastOptions={{
+              duration: 1000,
+              style: {
+                background: '#0f172a',
+                color: '#fff',
+                fontWeight: 600,
+                borderRadius: '12px',
+                padding: '12px 16px',
+              },
+              success: {
+                iconTheme: { primary: '#f97316', secondary: '#fff' },
+              },
+              error: {
+                style: { background: '#dc2626', color: '#fff' },
+              },
+            }}
+          />
+
+          <Routes>
+            <Route element={<MainLayout />}>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/ProductListPage" element={<ProductListPage />} />
+              <Route path="/products/:id" element={<ProductDetailPage />} />
+              <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+              <Route path="*" element={<NotFoundPage />} />
+
+
+              <Route element={<PublicRoute />}>
+                <Route path="/login" element={<LoginForm />} />
+                <Route path="/register" element={<RegisterForm />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              </Route>
+
+              <Route element={<PrivateRoute />}>
+                <Route path="/cart" element={<CartPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/checkout" element={<CheckoutPage />} />
+                <Route path="/orders" element={<OrdersPage />} />
+              </Route>
             </Route>
 
-            <Route element={<PrivateRoute />}>
-              <Route path="/cart" element={<CartPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/checkout" element={<CheckoutPage />} />
-              <Route path="/orders" element={<OrdersPage />} />
+            <Route element={<AdminRoute />}>
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminDashboardPage />} />
+                <Route path="products" element={<AdminProductsPage />} />
+                <Route path="orders" element={<AdminOrdersPage />} />
+                <Route path="users" element={<AdminUsersPage />} />
+                <Route path="categories" element={<AdminCategoriesPage />} />
+                <Route path="brands" element={<AdminBrandsPage />} />
+              </Route>
             </Route>
-          </Route>
-
-          <Route element={<AdminRoute />}>
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AdminDashboardPage />} />
-              <Route path="products" element={<AdminProductsPage />} />
-              <Route path="orders" element={<AdminOrdersPage />} />
-              <Route path="users" element={<AdminUsersPage />} />
-              <Route path="categories" element={<AdminCategoriesPage />} />
-              <Route path="brands" element={<AdminBrandsPage />} />
-            </Route>
-          </Route>
-        </Routes>
-      </CartProvider>
-    </BrowserRouter>
+          </Routes>
+        </CartProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }
 

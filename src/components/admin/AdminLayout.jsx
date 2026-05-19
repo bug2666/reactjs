@@ -1,5 +1,8 @@
+import { useEffect, useRef, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { BarChart3, Boxes, ClipboardList, FolderTree, Gem, Home, Shield, Users } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import axiosClient from "../../api/axiosClient";
 
 const navItems = [
     { to: "/admin", label: "Dashboard", icon: BarChart3, end: true },
@@ -10,7 +13,63 @@ const navItems = [
     { to: "/admin/brands", label: "Thương hiệu", icon: Gem }
 ];
 
+
+const fetchAdminOrders = async () => {
+    const res = await axiosClient.get(`/orders/admin/all`);
+    return res.data;
+};
+
 export default function AdminLayout() {
+    const [hasNewOrder, setHasNewOrder] = useState(false);
+
+    const previousOrderIdsRef = useRef(new Set());
+    const initializedRef = useRef(false);
+
+    const { data: orders = [] } = useQuery({
+        queryKey: ["admin-orders"],
+        queryFn: fetchAdminOrders,
+        refetchInterval: 10000
+    });
+
+    useEffect(() => {
+
+        // Lấy tất cả id hiện tại
+        const currentIds = orders.map(order => order.id);
+
+        // Nếu là lần chạy đầu tiên
+        if (initializedRef.current === false) {
+
+            previousOrderIdsRef.current = new Set(currentIds);
+
+            initializedRef.current = true;
+
+            return;
+        }
+
+        let foundNewOrder = false;
+
+        // Kiểm tra từng order
+        for (const id of currentIds) {
+
+            const existedBefore =
+                previousOrderIdsRef.current.has(id);
+
+            if (!existedBefore) {
+                foundNewOrder = true;
+                break;
+            }
+        }
+
+        if (foundNewOrder) {
+            setHasNewOrder(true);
+        }
+
+        // lưu snapshot mới
+        previousOrderIdsRef.current =
+            new Set(currentIds);
+
+    }, [orders]);
+
     return (
         <div className="min-h-screen bg-slate-50 lg:flex">
             <aside className="border-b border-slate-200 bg-slate-950 text-white lg:sticky lg:top-0 lg:min-h-screen lg:w-72 lg:border-b-0">
@@ -46,12 +105,18 @@ export default function AdminLayout() {
                 <nav className="flex gap-2 overflow-x-auto px-4 pb-4 lg:flex-col lg:overflow-visible lg:px-5 lg:pb-6">
                     {navItems.map((item) => {
                         const Icon = item.icon;
+                        const isOrdersLink = item.to === "/admin/orders";
 
                         return (
                             <NavLink
                                 key={item.to}
                                 to={item.to}
                                 end={item.end}
+                                onClick={() => {
+                                    if (isOrdersLink) {
+                                        setHasNewOrder(false);
+                                    }
+                                }}
                                 className={({ isActive }) => {
                                     const baseClass = "flex shrink-0 items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition";
 
@@ -63,7 +128,11 @@ export default function AdminLayout() {
                                 }}
                             >
                                 <Icon size={18} />
-                                {item.label}
+                                <span>{item.label}</span>
+
+                                {isOrdersLink && hasNewOrder && (
+                                    <span className="ml-auto h-2.5 w-2.5 rounded-full bg-orange-400" />
+                                )}
                             </NavLink>
                         );
                     })}
@@ -78,3 +147,4 @@ export default function AdminLayout() {
         </div>
     );
 }
+

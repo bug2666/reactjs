@@ -38,7 +38,7 @@ export default function CheckoutPage() {
                 }
             );
 
-            navigate("/orders");
+            window.location.href = "/orders";
         } catch (error) {
             // toast.promise đã hiển thị lỗi
         } finally {

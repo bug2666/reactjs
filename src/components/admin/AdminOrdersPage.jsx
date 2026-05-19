@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
 import { ClipboardList, PackageCheck } from "lucide-react";
 import toast from "react-hot-toast";
 import axiosClient from '../../api/axiosClient';
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const orderStatuses = [
     { value: "pending", label: "Chờ xử lý" },
@@ -27,62 +27,49 @@ const formatDate = (date) => {
     return new Date(date).toLocaleDateString("vi-VN");
 };
 
+/* call api lại để lấy data */
+const fetchAdminOrders = async () => {
+    const res = await axiosClient.get(`/orders/admin/all`);
+    return res.data;
+};
+
+
 export default function AdminOrdersPage() {
-    const [orders, setOrders] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [, setMessage] = useState("");
-
-    useEffect(() => {
-        const fetchOrders = async () => {
-            try {
-                setLoading(true);
-                setMessage("");
-
-                const res = await axiosClient.get(`/orders/admin/all`);
-
-                const data = res.data;
-
-                setOrders(data);
-            } catch (error) {
-                const message = error.response?.data?.message || error.message;
-                setMessage(message);
-                toast.error(`Tải đơn hàng thất bại: ${message}`);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchOrders();
-    }, []);
+    const queryClient = useQueryClient();
+    const {
+        data: orders = [],
+        isLoading: loading
+    } = useQuery({
+        queryKey: ["admin-orders"], /* định danh */
+        queryFn: fetchAdminOrders, /* gọi hàm call api */
+        refetchInterval: 5000
+    });
 
     const handleUpdateStatus = async (orderId, status) => {
         try {
-            setMessage("");
-
             const res = await axiosClient.put(`/orders/admin/${orderId}/status`, {
                 status
             });
 
-            const data = res.data;
+            const updatedOrder = res.data;
 
-            setOrders((currentOrders) => {
+            queryClient.setQueryData(["admin-orders"], (currentOrders = []) => {
                 return currentOrders.map((order) => {
                     if (order.id === orderId) {
-                        return data;
+                        return updatedOrder;
                     }
 
                     return order;
                 });
             });
 
-            setMessage("Cập nhật trạng thái đơn hàng thành công");
             toast.success("Cập nhật trạng thái đơn hàng thành công");
         } catch (error) {
             const message = error.response?.data?.message || error.message;
-            setMessage(message);
             toast.error(message);
         }
     };
+
 
     return (
         <section className="space-y-6">
