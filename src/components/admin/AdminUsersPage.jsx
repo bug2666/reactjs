@@ -15,7 +15,7 @@ const getInitials = (name) => {
 export default function AdminUsersPage() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [message, setMessage] = useState("");
+    const [, setMessage] = useState("");
     const [page, setPage] = useState(1);
     const [pagination, setPagination] = useState({
         page: 1,

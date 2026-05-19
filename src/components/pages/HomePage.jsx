@@ -16,12 +16,6 @@ import Marquee from "react-fast-marquee";
 
 const HERO_IMAGE = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1600&q=80";
 
-const STATIC_CATEGORIES = [
-  { name: "Giày thể thao", desc: "Hiệu năng & tốc độ", icon: Zap },
-  { name: "Sandal", desc: "Thoải mái mỗi bước", icon: Sparkles },
-  { name: "Dép", desc: "Phong cách thường ngày", icon: Flame }
-];
-
 const BRAND_STRIP = ["VELOCITY", "NIKE", "ADIDAS", "PUMA", "ASICS", "NEW BALANCE"];
 
 // Pool icon để gán cho từng category trả về từ DB (lặp lại nếu nhiều hơn pool)

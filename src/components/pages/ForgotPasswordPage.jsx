@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Mail } from "lucide-react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
@@ -15,11 +14,7 @@ const forgotPasswordSchema = Yup.object({
 
 
 export default function ForgotPasswordPage() {
-    const [isSuccess, setIsSuccess] = useState(false);
-
     const handleSubmit = async (values, helpers) => {
-        setIsSuccess(false);
-
         try {
             const res = await axiosClient.post('/auth/forgot-password', {
                 email: values.email
@@ -27,12 +22,10 @@ export default function ForgotPasswordPage() {
 
             const data = res.data;
 
-            setIsSuccess(true);
             toast.success(data.message || 'Đã gửi link đặt lại mật khẩu vào email');
             helpers.resetForm();
         } catch (error) {
             const message = error.response?.data?.message || error.message;
-            setIsSuccess(false);
             toast.error(message);
         } finally {
             helpers.setSubmitting(false);

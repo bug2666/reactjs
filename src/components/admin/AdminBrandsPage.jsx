@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Gem, Pencil, Plus, Trash2, X } from "lucide-react";
 import toast from "react-hot-toast";
 import axiosClient from "../../api/axiosClient";
@@ -6,24 +6,21 @@ import axiosClient from "../../api/axiosClient";
 export default function AdminBrandsPage() {
     const [brands, setBrands] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [message, setMessage] = useState("");
-    const [messageType, setMessageType] = useState("success");
+    const [, setMessage] = useState("");
     const [name, setName] = useState("");
     const [editingBrand, setEditingBrand] = useState(null);
 
     const showSuccessMessage = (text) => {
-        setMessageType("success");
         setMessage(text);
         toast.success(text);
     };
 
     const showErrorMessage = (text) => {
-        setMessageType("error");
         setMessage(text);
         toast.error(text);
     };
 
-    const fetchBrands = async () => {
+    const fetchBrands = useCallback(async () => {
         try {
             setLoading(true);
             setMessage("");
@@ -35,11 +32,11 @@ export default function AdminBrandsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
         fetchBrands();
-    }, []);
+    }, [fetchBrands]);
 
     const resetForm = () => {
         setName("");

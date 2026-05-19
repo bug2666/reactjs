@@ -27,8 +27,7 @@ export default function AdminProductsPage() {
     const [categories, setCategories] = useState([]);
     const [brands, setBrands] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [message, setMessage] = useState("");
-    const [messageType, setMessageType] = useState("success");
+    const [, setMessage] = useState("");
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
     const [expandedProductId, setExpandedProductId] = useState(null);
@@ -64,13 +63,11 @@ export default function AdminProductsPage() {
     });
 
     const showSuccessMessage = (text) => {
-        setMessageType("success");
         setMessage(text);
         toast.success(text);
     };
 
     const showErrorMessage = (text) => {
-        setMessageType("error");
         setMessage(text);
         toast.error(text);
     };

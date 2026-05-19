@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FolderTree, Pencil, Plus, Trash2, X } from "lucide-react";
 import toast from "react-hot-toast";
 import axiosClient from "../../api/axiosClient";
@@ -6,24 +6,21 @@ import axiosClient from "../../api/axiosClient";
 export default function AdminCategoriesPage() {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [message, setMessage] = useState("");
-    const [messageType, setMessageType] = useState("success");
+    const [, setMessage] = useState("");
     const [name, setName] = useState("");
     const [editingCategory, setEditingCategory] = useState(null);
 
     const showSuccessMessage = (text) => {
-        setMessageType("success");
         setMessage(text);
         toast.success(text);
     };
 
     const showErrorMessage = (text) => {
-        setMessageType("error");
         setMessage(text);
         toast.error(text);
     };
 
-    const fetchCategories = async () => {
+    const fetchCategories = useCallback(async () => {
         try {
             setLoading(true);
             setMessage("");
@@ -35,11 +32,11 @@ export default function AdminCategoriesPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
         fetchCategories();
-    }, []);
+    }, [fetchCategories]);
 
     const resetForm = () => {
         setName("");

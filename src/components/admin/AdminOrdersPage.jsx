@@ -30,7 +30,7 @@ const formatDate = (date) => {
 export default function AdminOrdersPage() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [message, setMessage] = useState("");
+    const [, setMessage] = useState("");
 
     useEffect(() => {
         const fetchOrders = async () => {
