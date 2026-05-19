@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { Truck, RotateCcw, ShieldCheck, Minus, Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import axiosClient from "../../api/axiosClient";
@@ -17,6 +17,7 @@ const HIGHLIGHTS = [
 export default function ProductDetailPage() {
   const { id } = useParams();
   const { addToCart } = useCart();
+  const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState("");
@@ -136,6 +137,26 @@ export default function ProductDetailPage() {
       });
 
       toast.success(`Đã thêm "${product.name}" vào giỏ hàng`);
+    } catch (error) {
+      const message = error.response?.data?.message || error.message;
+      toast.error(message);
+    }
+  };
+
+  const handleBuyNow = async () => {
+    if (!selectedVariant) {
+      toast.error("Vui lòng chọn size và màu");
+      return;
+    }
+
+    try {
+      await addToCart({
+        productId: product.id,
+        variantId: selectedVariant.id,
+        quantity
+      });
+
+      navigate("/checkout");
     } catch (error) {
       const message = error.response?.data?.message || error.message;
       toast.error(message);
@@ -361,10 +382,12 @@ export default function ProductDetailPage() {
                 </button>
                 <button
                   type="button"
+                  onClick={handleBuyNow}
                   className="rounded-full bg-slate-950 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-orange-500"
                 >
                   Mua ngay
                 </button>
+
               </div>
 
               <div className="mt-8 space-y-4 border-t border-slate-100 pt-6">
